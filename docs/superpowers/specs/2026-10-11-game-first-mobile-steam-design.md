@@ -8,6 +8,10 @@ Keep one Godot gameplay project for browser and native desktop releases. Present
 
 Interpret “square map” as a physically square primary arena, initially 18 × 18 world units, rather than forcing the browser canvas into a square. The user confirmed landscape-first mobile play. Keep portrait menus accessible and suggest rotating for combat.
 
+## Small addition completed
+
+The current browser launcher now shows a rotating-phone prompt when launched on a portrait touch device: “Rotate your phone to play.” It hides when the device becomes landscape and offers Continue in portrait so menus remain accessible. This does not implement the planned touch controls or game-first redesign.
+
 ## Current gaps verified in source
 
 - The primary roof is 14 × 10; collision, paint, facade, spawns, props, and safe areas use separate constants.
