@@ -23,6 +23,13 @@ Use the existing Grab button for pickup and a second tap for a timed throw; pres
 Differentiate eight props through physical behavior and recognizable modeling: three breakable wooden crates, three rolling metal barrels, and two bouncing beach balls. Shards remain children of the broken crate so arena reset owns all effects and cannot leave debris behind. Guard actual collision callbacks against changing another carried body's physics state during query flushing.
 
 
-## Beginner CPU pacing (2026-10-11)
+## Beginner CPU pacing (2026-10-11; superseded)
 
 The user found the default CPU overwhelming: it chased at full human speed into contact and attacked every 0.35–0.9 seconds. Give the CPU 50% movement input, two seconds of grace after countdown, 1.4-unit chase stopping distance, retreat below 0.9 units, deliberate in-range reaction delay, and half-second rests after attacks. Keep edge avoidance active during rests and human speed unchanged. Stationary bots face opponents without changing locked throw aim. This is the default; harder difficulty tiers can be added separately.
+
+
+## Natural decisions at normal speed (2026-10-11)
+
+The user clarified that opponents should make human-like decisions and mistakes, rather than have reduced movement strength. Restore full movement speed and replace chasing with short plans: seek/grab a prop, approach an opponent, prepare one attack, aim/throw, recover, or reposition. Plans remember a sampled position and use small aim errors; wind-up does not track a dodging opponent. Around 55% of decisions prefer an available nearby prop, with some sidestepping/hesitation. Combat still uses the existing player actions and physics. No human input or velocity prediction is used.
+
+Keep attack actions mutually exclusive and cancel/reassess invalid targets or interrupted plans. Preserve throw aim locks and edge checks. Automated dodge and actual pickup/throw tests verify exploitable mistakes and full-speed parity; natural feel still needs human feedback.

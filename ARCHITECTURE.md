@@ -10,7 +10,7 @@
 | `scripts/game/round_manager.gd` | Scores and first-to-three match resolution |
 | `scripts/player/player_controller.gd` | Character movement, attacks, grab tether, carry/throw, elimination and character animation |
 | `scripts/multiplayer/input_router.gd` | Per-source physical keyboard and gamepad sampling; action press edges |
-| `scripts/ai/bot_controller.gd` | Basic chase, nearby edge avoidance, randomized attacks |
+| `scripts/ai/bot_controller.gd` | Committed action plans, prop seeking/throws, imperfect aim, edge avoidance |
 | `scripts/arena/arena.gd` | Roofs, collision, skyline, spawn points, prop reset, safe-position queries |
 | `scripts/objects/physics_object.gd` | Rigid-body props, carrying, throwing and impact knockback |
 | `scripts/events/event_manager.gd` | Warning, timed activation, wind/slip/collapse, cleanup |
@@ -55,3 +55,8 @@ The slippery mechanic reduces character acceleration and temporarily duplicates 
 `npm run build` exports the same game through the `Web` preset to `dist/game/index.html` and copies `web/` to the static site root. The outer page creates a same-origin iframe on demand. Its custom engine shell reports `rooftop-ready` after engine startup or `rooftop-error` on failure; the outer page checks the message origin and source before updating launch status.
 
 The export uses single-threaded WebAssembly and WebGL 2. Native Quit is hidden in web builds, and setup explains browser gamepad discovery. Vercel runs the build from source using `vercel.json`; no backend or environment secrets are required. Keep generated binaries out of Git. See `memory/DECISIONS.md` for the browser-first decision.
+
+
+## CPU intent and mistakes
+
+Bots sample world positions at decision points, commit to a short approach or aim, then reassess. Full movement speed remains available; pauses, preparation, recovery, missed aim, and prop interaction give actions a readable rhythm. They use normal player actions for grabbing, attacking, and throwing, and do not inspect future or current human input. Tests check decision behavior and physical prop interaction rather than reduced speed.
