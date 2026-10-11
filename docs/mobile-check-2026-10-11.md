@@ -15,7 +15,7 @@ Tested the real Godot WebGL export, not a placeholder, in Chromium with touch ev
 
 ## Menu bug found and fixed
 
-A touch menu transition produced a Godot `can_process` error because controls were detached during their active button event. Menu and HUD cleanup now hide old controls and defer deletion, preserving scene-tree membership until event dispatch finishes. The local real-game mobile retry had no engine errors; all 25 integrated gameplay checks passed.
+A touch menu transition produced a Godot `can_process` error because controls were detached during their active button event. Menu and HUD cleanup now hide old controls and defer deletion, preserving scene-tree membership until event dispatch finishes. The local and hosted real-game mobile retries had no engine errors after the fix; all 25 integrated gameplay checks and GitHub CI passed. Vercel confirmed the fixed deployment ready before the hosted retry.
 
 ## Remaining work
 
