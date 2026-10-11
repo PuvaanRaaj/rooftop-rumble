@@ -7,8 +7,10 @@ config/features=PackedStringArray("4.5", "GL Compatibility")
 window/size/viewport_width=1280
 window/size/viewport_height=800
 window/stretch/mode="canvas_items"
+window/stretch/aspect="expand"
 [rendering]
 renderer/rendering_method="gl_compatibility"
+anti_aliasing/quality/msaa_3d=1
 environment/defaults/default_clear_color=Color(0.55,0.74,0.84,1)
 [physics]
 common/physics_ticks_per_second=60

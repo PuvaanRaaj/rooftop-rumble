@@ -47,8 +47,8 @@ func _ready() -> void:
 	var head := SphereMesh.new()
 	head.radius = 0.46
 	head.height = 0.88
-	head.radial_segments = 16
-	head.rings = 8
+	head.radial_segments = 24
+	head.rings = 12
 	var mesh := MeshInstance3D.new()
 	mesh.mesh = head
 	mesh.material_override = body_material
@@ -56,21 +56,63 @@ func _ready() -> void:
 	visual.add_child(mesh)
 	var dark := StandardMaterial3D.new()
 	dark.albedo_color = Color("18243c")
+	dark.roughness = 0.78
+	var trim := StandardMaterial3D.new()
+	trim.albedo_color = Color("fff0c9")
+	trim.roughness = 0.8
+	var white := StandardMaterial3D.new()
+	white.albedo_color = Color("ffffff")
+	# Contrasting suit details stay readable when the fighter faces the camera.
+	_piece(Vector3(0,0.36,0),Vector3(0.72,0.12,0.52),dark)
+	_piece(Vector3(0,0.36,-0.275),Vector3(0.16,0.1,0.035),trim)
+	_piece(Vector3(0,0.83,-0.265),Vector3(0.39,0.28,0.04),dark)
+	_piece(Vector3(0,0.83,-0.292),Vector3(0.12,0.15,0.025),trim)
+	_piece(Vector3(0,1.015,0),Vector3(0.5,0.07,0.4),trim)
 	for x in [-0.17,0.17]:
-		_piece(Vector3(x,1.3,-0.405),Vector3(0.09,0.12,0.055),dark)
+		_piece(Vector3(x,1.3,-0.405),Vector3(0.15,0.18,0.06),white)
+		_piece(Vector3(x,1.3,-0.444),Vector3(0.07,0.115,0.025),dark)
+		_piece(Vector3(x,1.43,-0.385),Vector3(0.17,0.045,0.055),dark)
 		_piece(Vector3(x,0.17,0),Vector3(0.24,0.3,0.36),dark)
+		_piece(Vector3(x,0.07,-0.085),Vector3(0.26,0.12,0.43),dark)
+		_piece(Vector3(x,0.025,-0.085),Vector3(0.265,0.045,0.435),trim)
+		_piece(Vector3(x,0.285,0),Vector3(0.25,0.06,0.37),trim)
+	_piece(Vector3(0,1.13,-0.432),Vector3(0.18,0.055,0.04),dark)
+	_piece(Vector3(0,1.143,-0.457),Vector3(0.12,0.025,0.015),white)
 	for side in [-1,1]:
 		var arm := Node3D.new()
 		arm.position = Vector3(side * 0.46,0.9,0)
 		visual.add_child(arm)
 		arms.append(arm)
+		var sleeve := MeshInstance3D.new()
+		var sleeve_mesh := CapsuleMesh.new()
+		sleeve_mesh.radius = 0.125
+		sleeve_mesh.height = 0.36
+		sleeve_mesh.radial_segments = 12
+		sleeve_mesh.rings = 4
+		sleeve.mesh = sleeve_mesh
+		sleeve.material_override = body_material
+		sleeve.position.y = -0.115
+		arm.add_child(sleeve)
 		var fist := MeshInstance3D.new()
-		var box := BoxMesh.new()
-		box.size = Vector3(0.25,0.43,0.28)
-		fist.mesh = box
-		fist.material_override = body_material
-		fist.position.y = -0.18
+		var glove := SphereMesh.new()
+		glove.radius = 0.16
+		glove.height = 0.29
+		glove.radial_segments = 12
+		glove.rings = 6
+		fist.mesh = glove
+		fist.material_override = dark
+		fist.position.y = -0.3
 		arm.add_child(fist)
+		var cuff := MeshInstance3D.new()
+		var cuff_mesh := CylinderMesh.new()
+		cuff_mesh.top_radius = 0.13
+		cuff_mesh.bottom_radius = 0.13
+		cuff_mesh.height = 0.065
+		cuff_mesh.radial_segments = 12
+		cuff.mesh = cuff_mesh
+		cuff.material_override = trim
+		cuff.position.y = -0.235
+		arm.add_child(cuff)
 	var label := Label3D.new()
 	label.text = config.get("name", "Fighter")
 	label.position.y = 2.0

@@ -21,8 +21,8 @@ func _ready() -> void:
 	environment.background_color = Color("a5d1de")
 	environment.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
 	environment.ambient_light_color = Color("d4e9ff")
-	environment.ambient_light_energy = 0.5
-	environment.tonemap_mode = Environment.TONE_MAPPER_FILMIC
+	environment.ambient_light_energy = 0.32
+	environment.tonemap_mode = Environment.TONE_MAPPER_LINEAR
 	world.environment = environment
 	add_child(world)
 	var light := DirectionalLight3D.new()

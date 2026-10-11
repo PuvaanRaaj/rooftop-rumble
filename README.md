@@ -117,3 +117,8 @@ The single-thread web export loaded in Chromium 151 using WebGL 2 with no consol
 A clean Ubuntu GitHub Actions build downloaded the pinned Linux Godot engine and verified web template, then exported successfully. Check the [browser build workflow](https://github.com/PuvaanRaaj/rooftop-rumble/actions/workflows/web-build.yml) for the latest commit. The Vercel hosting configuration is prepared; a Vercel deployment has not been created.
 
 ![Browser launch page](docs/browser-preview.png)
+
+
+### Closer cartoon presentation
+
+The camera now shows fighters and the main roof roughly one-third larger at the standard 16:10 size, while adapting to keep the side roofs visible. Fighter faces/clothing, roof panels, facade windows, vents, and signage have more detail. The browser embed retains its game aspect ratio at narrower widths and the viewport expands for fullscreen. This visual pass preserves the current playable arena dimensions and combat controls.
