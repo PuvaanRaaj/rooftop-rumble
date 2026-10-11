@@ -11,9 +11,11 @@ func _ready() -> void:
 	current = true
 func _fit_arena() -> void:
 	var viewport_size := get_viewport().get_visible_rect().size
+	if viewport_size.x <= 0 or viewport_size.y <= 0: return
 	var aspect := viewport_size.x / maxf(viewport_size.y, 1.0)
 	# Zoom closer while keeping every satellite roof inside narrower views.
-	size = maxf(15.0, 24.0 / aspect)
+	var minimum_span := 12.0 if RumbleInput.touch_available() else 15.0
+	size = maxf(minimum_span, 24.0 / aspect)
 func bump(amount: float) -> void:
 	trauma = minf(trauma + amount,0.5)
 func _process(delta: float) -> void:

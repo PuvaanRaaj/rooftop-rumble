@@ -4,7 +4,7 @@ A browser-first 3D party brawler for 2–4 fighters, built with Godot and GDScri
 
 ## Play in your browser
 
-The first release targets desktop browsers with WebGL 2. Play solo against CPU opponents, share a keyboard with a friend, or connect controllers for up to four local fighters. Players share one computer; online multiplayer and touch controls are not included.
+Play in a WebGL 2 browser on desktop or a phone in landscape. Phones default to one touchscreen player against CPUs, with a floating joystick and Jump, Punch, and Grab/Throw buttons. Desktop supports shared keyboards and controllers for up to four local fighters. Online multiplayer is not included. Physical phone performance still needs device testing.
 
 ```sh
 npm install
@@ -73,6 +73,7 @@ godot --headless --path . --script tests/test_match.gd
 godot --headless --path . --script tests/test_gameplay.gd
 godot --headless --path . --fixed-fps 60 --script tests/test_throw.gd
 godot --headless --path . --fixed-fps 60 --script tests/test_props.gd
+godot --headless --path . --fixed-fps 60 --script tests/test_mobile_input.gd
 godot --path . --script tests/test_input.gd
 godot --headless --path . --fixed-fps 60 --script tests/test_bots.gd
 godot --headless --path . --quit-after 120
@@ -140,3 +141,10 @@ Native validation passed 20 animated-throw checks, 17 prop checks, 25 gameplay c
 CPU fighters use the same movement speed and combat rules as the player. They pause to assess, pursue a prop or opponent, prepare one action, commit to its direction, and recover or reposition. Their aim is imperfect and their plan uses a recent target position, so dodges can make attacks and throws miss. They can pick up real props and throw them through the same animation as human players.
 
 This is a lightweight game AI with varied decisions; human playtesting is still needed to tune how natural it feels. A difficulty selector is not included.
+
+
+### Phone controls
+
+Rotate horizontally and tap Play, then Start Match. Player 1 defaults to **Touchscreen**. Drag the left joystick to move; use **Jump**, **Punch**, and **Grab** on the right. Grab changes to **Throw** while holding. Multiple fingers can move and act together, and short taps remain reliable between physics frames. The small Menu button returns to the game menu.
+
+Phone play fills the available viewport, with larger menus and notch-safe margins. Rotation prompts, leaving the game page, and backgrounding pause the embedded game; lifecycle changes clear held touches. Actual iPhone/Android frame rate, thermal behavior, and thumb comfort are not established by browser emulation.

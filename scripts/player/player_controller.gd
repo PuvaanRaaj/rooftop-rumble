@@ -154,6 +154,7 @@ func _physics_process(delta: float) -> void:
 	if active:
 		if not input_override.is_empty(): actions = input_override
 		elif bot != null: actions = bot.sample(self, arena, delta)
+		elif config.get("kind", "keyboard") == "touch": actions = RumbleInput.sample_touch()
 		else: actions = RumbleInput.sample(config.get("slot",0),config.get("device",-1))
 	var direction := Vector3.ZERO
 	var movement: Vector2 = actions.get("move",Vector2.ZERO)
@@ -343,7 +344,7 @@ func _create_hold_feedback() -> void:
 	aim_arrow.add_child(shaft)
 	hold_hint = Label3D.new()
 	var key := "Y" if config.get("device",-1) >= 0 else ("E" if config.get("slot",0) == 0 else "Enter")
-	hold_hint.text = key + " THROW"
+	hold_hint.text = "TAP THROW" if config.get("kind", "keyboard") == "touch" else key + " THROW"
 	hold_hint.position.y = 2.45
 	hold_hint.font_size = 30
 	hold_hint.pixel_size = 0.009

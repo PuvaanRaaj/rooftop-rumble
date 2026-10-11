@@ -3,9 +3,43 @@ extends RefCounted
 ## Poll physical keys so multiple players never share action-map bindings.
 
 static var _previous: Dictionary = {}
+static var touch_move := Vector2.ZERO
+static var touch_held: Dictionary = {"jump": false, "punch": false, "shove": false, "grab": false}
+static var _touch_pending: Dictionary = {}
+
+static func touch_available() -> bool:
+	if DisplayServer.is_touchscreen_available():
+		return true
+	if OS.has_feature("web"):
+		return bool(JavaScriptBridge.eval("navigator.maxTouchPoints > 0", true))
+	return false
+
+static func clear_touch() -> void:
+	touch_move = Vector2.ZERO
+	for action in touch_held:
+		touch_held[action] = false
+	_touch_pending.clear()
+
+static func press_touch(action: String) -> void:
+	if not touch_held.get(action, false):
+		_touch_pending[action] = int(_touch_pending.get(action, 0)) + 1
+	touch_held[action] = true
+
+static func release_touch(action: String, canceled: bool = false) -> void:
+	touch_held[action] = false
+	if canceled: _touch_pending.erase(action)
+
+static func sample_touch() -> Dictionary:
+	var result := {"move": touch_move}
+	for action in touch_held:
+		var pending: int = _touch_pending.get(action, 0)
+		result[action] = pending > 0
+		if pending > 0: _touch_pending[action] = pending - 1
+	return result
 
 static func reset() -> void:
 	_previous.clear()
+	clear_touch()
 
 static func sample(slot: int, device: int = -1) -> Dictionary:
 	var move := Vector2.ZERO

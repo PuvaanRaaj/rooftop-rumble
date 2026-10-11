@@ -10,7 +10,7 @@ Interpret “square map” as a physically square primary arena, initially 18 ×
 
 ## Small addition completed
 
-The current browser launcher now shows a rotating-phone prompt when launched on a portrait touch device: “Rotate your phone to play.” It hides when the device becomes landscape and offers Continue in portrait so menus remain accessible. This does not implement the planned touch controls or game-first redesign.
+The current browser launcher now shows a rotating-phone prompt when launched on a portrait touch device: “Rotate your phone to play.” It hides when the device becomes landscape and offers Continue in portrait so menus remain accessible. A subsequent phone-playability fix implements touch controls, automatic touch player selection, mobile menu scaling, and viewport-filling mobile play. The square arena, dynamic camera, character/content, and Steam phases remain proposed.
 
 ## Current gaps verified in source
 

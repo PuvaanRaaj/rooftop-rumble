@@ -1,6 +1,6 @@
 # Mobile readiness check — 2026-10-11
 
-Result: browser loading works; touch-only gameplay is not ready.
+Original audit result: browser loading worked; touch-only gameplay was absent. See the subsequent fix below.
 
 ## Verification
 
@@ -22,3 +22,10 @@ A touch menu transition produced a Godot `can_process` error because controls we
 Implement the shared touch input layer and mobile menus/HUD, then the viewport-filling game shell and camera framing from the approved orientation design. Test physical Android Chrome and iPhone Safari for sustained performance, input comfort, orientation changes, backgrounding, and browser-specific fullscreen behavior. Chromium emulation cannot establish those hardware/browser results.
 
 The broader game-first/mobile implementation remains proposed in `docs/superpowers/specs/2026-10-11-game-first-mobile-steam-design.md`.
+
+
+## Subsequent mobile gameplay fix
+
+Phone screenshots confirmed that setup still assigned a keyboard and no touch controls appeared. The game now defaults to Touchscreen, provides a floating joystick plus Jump/Punch/Grab/Throw, and uses independent finger ownership. Action presses are latched through physics updates. Phone gameplay fills the viewport, menus use larger responsive dimensions, and visibility/orientation transitions reset input and pause the game.
+
+The automated mobile input suite passes 33 checks, including real movement, jump, prop pickup/physical throw, cancellation, short taps, and round/menu/elimination cleanup. Physical phone QA remains required.

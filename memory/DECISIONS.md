@@ -35,3 +35,10 @@ The user clarified that opponents should make human-like decisions and mistakes,
 Keep attack actions mutually exclusive and cancel/reassess invalid targets or interrupted plans. Preserve throw aim locks and edge checks. Automated dodge and actual pickup/throw tests verify exploitable mistakes and full-speed parity; natural feel still needs human feedback.
 
 AI references must be both valid and inside the scene tree before reading world transforms. Round/menu cleanup can detach a prop before freeing it; validity checks alone do not prevent transform errors.
+
+
+## Real mobile gameplay (2026-10-11)
+
+Phone screenshots still showed Keyboard 1 and no action controls. Implement touch as a real input source rather than keyboard event emulation: a shared Godot CanvasLayer owns independent finger IDs, a floating joystick, action buttons, and contextual Grab/Throw. Latch action presses until physics samples them so fast taps and release/repress are not lost. Cancellation and lifecycle resets discard pending actions.
+
+Phones default to one touch-controlled human plus CPUs. Use 960×540 landscape and 540×960 portrait logical UI bases, compact scrollable menus, larger buttons, and a viewport-filling web embed with safe-area margins. Browser visibility messages pause the game while the rotation prompt/page hides it and clear touches before resume. Keep desktop keyboard/controller routing and arena physics unchanged.
