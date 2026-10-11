@@ -6,7 +6,7 @@ Status: proposed design for review. This document changes no game code and creat
 
 Keep one Godot gameplay project for browser and native desktop releases. Present it as a game from the first screen: a viewport-filling arena, compact menus, readable characters, and controls appropriate to the device. Colorful cartoon action remains the selected art direction.
 
-Interpret “square map” as a physically square primary arena, initially 18 × 18 world units, rather than forcing the browser canvas into a square. Landscape-first mobile is recommended; the orientation preference is awaiting the user's answer.
+Interpret “square map” as a physically square primary arena, initially 18 × 18 world units, rather than forcing the browser canvas into a square. The user confirmed landscape-first mobile play. Keep portrait menus accessible and suggest rotating for combat.
 
 ## Current gaps verified in source
 
@@ -64,7 +64,7 @@ Acceptance: the title, setup, match, pause, and results all work without page sc
 
 ### Orientation and quality
 
-- Recommended: landscape-first combat, with accessible portrait menus and a small rotate suggestion. The app must remain usable if orientation locking is unavailable.
+- Confirmed: landscape-first combat, with accessible portrait menus and a small rotate suggestion. The app must remain usable if orientation locking is unavailable.
 - Support viewport resizing and browser toolbar changes without stretching controls, clipping menus, or leaving stuck movement.
 - Introduce Auto / Low / High visual settings. Scale shadows, particle counts, decorative detail, antialiasing, and rendering resolution based on measured device performance.
 - Initial performance goals: stable 60 FPS on tested desktop hardware and at least 30 FPS on declared supported midrange phones. These are acceptance targets, not current guarantees.
