@@ -202,6 +202,34 @@ func run() -> void:
 	var arena := RooftopArena.new()
 	arena._safe_rects.append(Rect2(-7,-5,14,10))
 	root.add_child(arena)
+	# Round cleanup can detach nodes before queued deletion invalidates references.
+	var detached_target := RumblePlayer.new()
+	root.add_child(detached_target)
+	detached_target.set_physics_process(false)
+	guarded.target = detached_target
+	guarded.intent = RumbleBot.Intent.ATTACK_WINDUP
+	guarded.planned_action = "punch"
+	guarded.pickup_plan = false
+	guarded.intent_time = 0
+	root.remove_child(detached_target)
+	check(is_instance_valid(detached_target) and not guarded._valid_target(), "Live detached fighter is no longer a valid target during round cleanup")
+	check(combat_count(guarded.sample(cpu, arena, 0.01)) == 0, "Detached fighter cancels queued combat without reading a missing world transform")
+	detached_target.free()
+	var detached_prop := RumbleProp.new()
+	root.add_child(detached_prop)
+	detached_prop.position = cpu.position + Vector3.RIGHT * 0.8
+	guarded.target = human
+	guarded.prop_target = detached_prop
+	guarded.destination = detached_prop.position
+	guarded.planned_action = "grab"
+	guarded.intent = RumbleBot.Intent.SEEK_PROP
+	guarded.intent_time = 1
+	guarded.sample(cpu, arena, 0.01)
+	guarded.intent_time = 0
+	root.remove_child(detached_prop)
+	check(is_instance_valid(detached_prop) and not guarded._available_prop(detached_prop, arena), "Live detached prop is unavailable before accessing its world position")
+	check(combat_count(guarded.sample(cpu, arena, 0.01)) == 0, "Detached prop cancels queued pickup safely during round cleanup")
+	detached_prop.free()
 	cpu.position = Vector3(6.5,0,0)
 	human.position = Vector3(12,0,0)
 	var edge := RumbleBot.new()

@@ -33,3 +33,5 @@ The user found the default CPU overwhelming: it chased at full human speed into 
 The user clarified that opponents should make human-like decisions and mistakes, rather than have reduced movement strength. Restore full movement speed and replace chasing with short plans: seek/grab a prop, approach an opponent, prepare one attack, aim/throw, recover, or reposition. Plans remember a sampled position and use small aim errors; wind-up does not track a dodging opponent. Around 55% of decisions prefer an available nearby prop, with some sidestepping/hesitation. Combat still uses the existing player actions and physics. No human input or velocity prediction is used.
 
 Keep attack actions mutually exclusive and cancel/reassess invalid targets or interrupted plans. Preserve throw aim locks and edge checks. Automated dodge and actual pickup/throw tests verify exploitable mistakes and full-speed parity; natural feel still needs human feedback.
+
+AI references must be both valid and inside the scene tree before reading world transforms. Round/menu cleanup can detach a prop before freeing it; validity checks alone do not prevent transform errors.

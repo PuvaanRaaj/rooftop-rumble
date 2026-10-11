@@ -75,7 +75,7 @@ func _decide(player: RumblePlayer, arena: RooftopArena) -> void:
 	target = null
 	var best := INF
 	for other in player.get_tree().get_nodes_in_group("fighters"):
-		if other == player or not other.alive: continue
+		if other == player or not other.is_inside_tree() or not other.alive: continue
 		var distance: float = player.global_position.distance_to(other.global_position)
 		if distance < best:
 			best = distance
@@ -124,13 +124,13 @@ func _decide(player: RumblePlayer, arena: RooftopArena) -> void:
 		intent_time = randf_range(0.4, 0.75)
 
 func _valid_target() -> bool:
-	return is_instance_valid(target) and target.alive
+	return is_instance_valid(target) and target.is_inside_tree() and target.alive
 
 func _holding(player: RumblePlayer) -> bool:
 	return is_instance_valid(player.held_prop) or is_instance_valid(player.grabbed_target)
 
 func _available_prop(prop, arena: RooftopArena) -> bool:
-	return is_instance_valid(prop) and not prop.broken and not prop._break_pending and prop.carrier == null and (arena == null or arena.is_safe_position(prop.global_position))
+	return is_instance_valid(prop) and prop.is_inside_tree() and not prop.broken and not prop._break_pending and prop.carrier == null and (arena == null or arena.is_safe_position(prop.global_position))
 
 func _flat(value: Vector3) -> Vector3:
 	return value * Vector3(1, 0, 1)
