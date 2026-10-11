@@ -14,3 +14,10 @@ Sources: [Godot web export](https://docs.godotengine.org/en/4.5/tutorials/export
 The screenshot showed excessive empty sky, tiny fighters, and letterboxing at narrower browser widths. Reduce the orthographic span from 20 to 15 units while fitting at least 24 horizontal units to keep satellite roofs visible. Let the viewport expand with its container and keep the browser embed at 16:10, including below the responsive breakpoint.
 
 Improve current art through suit/face detail, roof seams, architectural trim, quieter skyline colors, linear tonemapping, and 2x MSAA. Batch facade/city windows to keep the browser scene lightweight. Keep physical arena bounds and combat unchanged during this focused visual pass; larger playable maps belong to the proposed content upgrade.
+
+
+## Contextual throws and distinct props (2026-10-11)
+
+Use the existing Grab button for pickup and a second tap for a timed throw; preserve Shove as a throw shortcut. Keep `release_hold(true)` immediate so physics integration and existing callers retain a predictable primitive; `begin_throw()` owns wind-up, locked aim, one release, and follow-through. Release props in front of the fighter to avoid throwing through their collider. Cancel pending actions during hits, escape, elimination, inactive rounds, and menu/reset cleanup.
+
+Differentiate eight props through physical behavior and recognizable modeling: three breakable wooden crates, three rolling metal barrels, and two bouncing beach balls. Shards remain children of the broken crate so arena reset owns all effects and cannot leave debris behind. Guard actual collision callbacks against changing another carried body's physics state during query flushing.

@@ -48,12 +48,12 @@ Godot's Compatibility renderer is configured. Native builds target macOS, Window
 | Jump / struggle out of a grab | Space | Right Shift | A / bottom face button |
 | Punch | F | K | X / left face button |
 | Shove / throw held fighter or object | G | L | B / right face button |
-| Grab / pick up / release | E | Enter | Y / top face button |
+| Grab / pick up / throw | E | Enter | Y / top face button |
 | Return to main menu | Escape | Escape | Keyboard Escape |
 
 Left Shift is also accepted for Keyboard 2. Controller face buttons use Godot's standard gamepad mapping; printed symbols vary by controller. Connect controllers **before opening player setup**. Each keyboard layout and controller can join once; multiple CPU opponents are allowed. The default crew is Keyboard 1 and one CPU.
 
-Face a nearby target to punch, shove, or grab. Grab toggles holding: press again to release, or shove to throw. Punch breaks a grab when fighting back; it does not throw your held target. Carrying slows movement. Repeated jump or punch inputs help a grabbed fighter escape, and grabs expire automatically.
+Face a nearby target to punch, shove, or grab. Tap Grab to pick up a fighter or prop, then tap again to throw with a visible wind-up and follow-through. Shove also throws while holding. Punch breaks a grab when fighting back; it does not throw your held target. Carrying slows movement. Repeated jump or punch inputs help a grabbed fighter escape, and grabs expire automatically.
 
 ## Rules
 
@@ -71,6 +71,8 @@ Run these from the project directory, replacing `godot` with your installed Godo
 godot --headless --path . --editor --import --quit
 godot --headless --path . --script tests/test_match.gd
 godot --headless --path . --script tests/test_gameplay.gd
+godot --headless --path . --fixed-fps 60 --script tests/test_throw.gd
+godot --headless --path . --fixed-fps 60 --script tests/test_props.gd
 godot --path . --script tests/test_input.gd
 godot --headless --path . --fixed-fps 60 --script tests/test_bots.gd
 godot --headless --path . --quit-after 120
@@ -85,7 +87,7 @@ The native input suite uses synthetic physical key events; it does not prove har
 1. Assign Keyboard 1 and Keyboard 2. Move both simultaneously and trigger each action independently. Check keyboard rollover with multiple movement/action keys held.
 2. Connect controllers, reopen setup, and assign up to four fighters. Confirm each device moves only its assigned fighter and duplicate input assignments are rejected.
 3. Punch and shove near every edge. Confirm readable hit effects, brief stun, reliable elimination, and no interference from eliminated fighters.
-4. Grab a fighter, drag, release, throw with shove, and escape with repeated jump/punch. Pick up each prop type, release it, and throw it into an opponent.
+4. Grab a fighter, drag, tap Grab again to throw, and escape with repeated jump/punch. Pick up each prop type and throw it with Grab or Shove; check wind-up, release, spin, collisions, and crate breakage.
 5. Survive past 20 seconds repeatedly. Watch warning messages, test wind/sliding, leave a red shaking side roof before collapse, and confirm it returns.
 6. Complete three wins, replay the match, and return to the menu during play. Confirm fresh scores, fighters, platforms, and props.
 
@@ -122,3 +124,12 @@ A clean Ubuntu GitHub Actions build downloaded the pinned Linux Godot engine and
 ### Closer cartoon presentation
 
 The camera now shows fighters and the main roof roughly one-third larger at the standard 16:10 size, while adapting to keep the side roofs visible. Fighter faces/clothing, roof panels, facade windows, vents, and signage have more detail. The browser embed retains its game aspect ratio at narrower widths and the viewport expands for fullscreen. This visual pass preserves the current playable arena dimensions and combat controls.
+
+
+### Animated throws and interactive props
+
+Tap **E / Enter / gamepad Y** to grab, then tap again to throw. A direction arrow and THROW prompt show what to do while carrying. The fighter draws the object back, releases it into a spinning physical arc, and follows through; **G / L / gamepad B** remains a throw shortcut. Hits, escapes, and round/menu transitions cancel unfinished throws.
+
+The roof now has eight props: wooden crates that break into fading shards after thrown impacts, heavier metal barrels that roll and tumble, and colorful beach balls with stronger bounce. Props reset between rounds. Automated throw and prop suites cover timing, cancellation, physical flight, bounce, impact safety, and cleanup.
+
+Native validation passed 20 animated-throw checks, 17 prop checks, 25 gameplay checks, and a full four-CPU match. The exported game loaded and completed browser menu/match/input checks without console errors. Carry, wind-up, and release snapshots are saved under `docs/throw-*.png`.

@@ -113,8 +113,8 @@ func _button(text: String, callback: Callable) -> Button:
 func _controls() -> void:
 	_content.add_child(_label("KEYBOARD 1   WASD · Space · F / G / E", 16, MUTED))
 	_content.add_child(_label("KEYBOARD 2   Arrows · Shift · K / L / Enter", 16, MUTED))
-	_content.add_child(_label("GAMEPAD   Left stick · A jump · X punch · B shove · Y grab", 15, MUTED))
-	_content.add_child(_label("Grab picks up / releases. Shove throws held objects or opponents.", 15, ACCENT))
+	_content.add_child(_label("GAMEPAD   Left stick · A jump · X punch · B shove · Y grab/throw", 15, MUTED))
+	_content.add_child(_label("Tap E / Enter / Y to grab. Tap again to THROW!", 15, ACCENT))
 
 func show_menu() -> void:
 	_clear()

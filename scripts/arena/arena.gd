@@ -89,7 +89,7 @@ func is_safe_position(pos: Vector3) -> bool:
 	return false
 
 func _spawn_props() -> void:
-	var locations := [Vector3(-2.7, 0.75, -0.9), Vector3(2.5, 0.75, 1.2), Vector3(-4.8, 0.75, 0.7), Vector3(4.8, 0.75, -1.1), Vector3(-1.2, 0.75, 3.2), Vector3(1.5, 0.75, -3.1)]
+	var locations := [Vector3(-2.7, 0.75, -0.9), Vector3(2.5, 0.75, 1.2), Vector3(-4.8, 0.75, 0.7), Vector3(4.8, 0.75, -1.1), Vector3(-1.2, 0.75, 3.2), Vector3(1.5, 0.75, -3.1), Vector3(-5.1, 0.75, 2.6), Vector3(5.1, 0.75, -2.6)]
 	var colors := [Color("ff9c5d"), Color("ef6584"), Color("53cbbc")]
 	var prop_script := load("res://scripts/objects/physics_object.gd")
 	for i in locations.size():

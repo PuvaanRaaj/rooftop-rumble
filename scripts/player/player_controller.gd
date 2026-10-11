@@ -27,6 +27,13 @@ var attack_pose := 0.0
 var flash := 0.0
 var elapsed := 0.0
 var bot: RumbleBot
+const THROW_WINDUP := 0.18
+const THROW_FOLLOWTHROUGH := 0.2
+var throw_time := -1.0
+var throw_aim := Vector3.FORWARD
+var followthrough := 0.0
+var aim_arrow: Node3D
+var hold_hint: Label3D
 var arena: RooftopArena
 var input_override: Dictionary = {}
 func _ready() -> void:
@@ -121,6 +128,7 @@ func _ready() -> void:
 	label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 	label.no_depth_test = true
 	add_child(label)
+	_create_hold_feedback()
 	if config.get("kind", "keyboard") == "cpu":
 		bot = RumbleBot.new()
 func _piece(pos: Vector3, size: Vector3, mat: Material) -> void:
@@ -140,6 +148,8 @@ func _physics_process(delta: float) -> void:
 	stun = maxf(0,stun-delta)
 	flash = maxf(0,flash-delta)
 	attack_pose = maxf(0,attack_pose-delta)
+	followthrough = maxf(0,followthrough-delta)
+	_advance_throw(delta)
 	var actions: Dictionary = {"move":Vector2.ZERO}
 	if active:
 		if not input_override.is_empty(): actions = input_override
@@ -149,7 +159,7 @@ func _physics_process(delta: float) -> void:
 	var movement: Vector2 = actions.get("move",Vector2.ZERO)
 	# Camera faces straight down Z, so keyboard directions match the screen.
 	direction = Vector3(movement.x,0,movement.y).limit_length()
-	if direction.length() > 0.1 and stun <= 0: facing = direction.normalized()
+	if direction.length() > 0.1 and stun <= 0 and throw_time < 0 and followthrough <= 0: facing = direction.normalized()
 	var target := direction * speed if active and stun <= 0 else Vector3.ZERO
 	if grabbed_target != null or held_prop != null: target *= 0.72
 	var rate := acceleration if is_on_floor() else acceleration * 0.35
@@ -163,7 +173,7 @@ func _physics_process(delta: float) -> void:
 	if active and stun <= 0:
 		if actions.get("punch",false): attack(false)
 		if actions.get("shove",false):
-			if held_prop != null or grabbed_target != null: release_hold(true)
+			if held_prop != null or grabbed_target != null: begin_throw()
 			else: attack(true)
 		if actions.get("grab",false): toggle_grab()
 	if grabbed_by != null:
@@ -197,7 +207,12 @@ func _physics_process(delta: float) -> void:
 	visual.scale = visual.scale.lerp(Vector3.ONE,delta*9)
 	visual.rotation.z = sin(elapsed*14) * minf(movement.length(),1) * 0.08
 	for i in range(arms.size()):
-		arms[i].rotation.x = -1.5 if attack_pose > 0 or held_prop != null or grabbed_target != null else sin(elapsed*12+i*PI)*movement.length()*0.35
+		if throw_time >= 0:
+			arms[i].rotation.x = lerpf(1.5,3.4,throw_time / THROW_WINDUP)
+		elif followthrough > 0:
+			arms[i].rotation.x = lerpf(0,1.3,followthrough / THROW_FOLLOWTHROUGH)
+		else:
+			arms[i].rotation.x = 1.5 if attack_pose > 0 or held_prop != null or grabbed_target != null else sin(elapsed*12+i*PI)*movement.length()*0.35
 	body_material.emission_enabled = flash > 0
 	body_material.emission = Color.WHITE * 0.6
 	if global_position.y < -8: eliminate()
@@ -226,8 +241,9 @@ func receive_hit(force: Vector3, duration: float) -> void:
 	flash = 0.15
 	visual.scale = Vector3(1.25,0.7,1.25)
 func toggle_grab() -> void:
+	if throw_time >= 0 or followthrough > 0: return
 	if held_prop != null or grabbed_target != null:
-		release_hold(false)
+		begin_throw()
 		return
 	if grab_cooldown > 0 or grabbed_by != null: return
 	grab_cooldown = 0.3
@@ -252,9 +268,13 @@ func toggle_grab() -> void:
 func _update_hold() -> void:
 	if not is_instance_valid(held_prop): held_prop = null
 	if held_prop != null:
-		held_prop.global_position = global_position+Vector3.UP*1.3+facing*0.9
+		var progress := clampf(throw_time / THROW_WINDUP,0,1)
+		held_prop.global_position = global_position+Vector3.UP*(1.3+progress*0.65)+facing*(0.9-progress*1.2)
 	if not is_instance_valid(grabbed_target): grabbed_target = null
+	_update_hold_feedback()
 func release_hold(throw_it: bool) -> void:
+	throw_time = -1
+	followthrough = 0
 	if is_instance_valid(held_prop):
 		held_prop.release(facing*14+Vector3.UP*5 if throw_it else Vector3.ZERO)
 		held_prop = null
@@ -264,6 +284,7 @@ func release_hold(throw_it: bool) -> void:
 		target.grabbed_by = null
 		if throw_it: target.receive_hit(facing*11+Vector3.UP*5,0.5)
 	grab_cooldown = 0.4
+	_update_hold_feedback()
 func eliminate() -> void:
 	if not alive: return
 	release_hold(false)
@@ -275,3 +296,67 @@ func eliminate() -> void:
 	visible = false
 	impact.emit(global_position,config.get("color",Color.WHITE),1.2)
 	knocked_out.emit(self)
+
+func begin_throw() -> void:
+	if not alive or not active or stun > 0 or grabbed_by != null: return
+	if throw_time >= 0 or followthrough > 0: return
+	if not is_instance_valid(held_prop) and not is_instance_valid(grabbed_target): return
+	throw_aim = facing
+	throw_time = 0
+
+func _advance_throw(delta: float) -> void:
+	if throw_time < 0: return
+	if not alive or not active or stun > 0 or grabbed_by != null or (not is_instance_valid(held_prop) and not is_instance_valid(grabbed_target)):
+		release_hold(false)
+		return
+	facing = throw_aim
+	throw_time += delta
+	if throw_time >= THROW_WINDUP:
+		if is_instance_valid(held_prop):
+			held_prop.global_position = global_position + facing * 1.05 + Vector3.UP * 1.45
+		release_hold(true)
+		followthrough = THROW_FOLLOWTHROUGH
+
+func _create_hold_feedback() -> void:
+	aim_arrow = Node3D.new()
+	add_child(aim_arrow)
+	var mat := StandardMaterial3D.new()
+	mat.albedo_color = Color("fff0a0")
+	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	mat.no_depth_test = true
+	mat.cull_mode = BaseMaterial3D.CULL_DISABLED
+	var arrow := MeshInstance3D.new()
+	var shape := ImmediateMesh.new()
+	shape.surface_begin(Mesh.PRIMITIVE_TRIANGLES)
+	for point in [Vector3(-0.24,0,-1.45),Vector3(0,0,-2.05),Vector3(0.24,0,-1.45)]:
+		shape.surface_add_vertex(point)
+	shape.surface_end()
+	arrow.mesh = shape
+	arrow.material_override = mat
+	aim_arrow.add_child(arrow)
+	var shaft := MeshInstance3D.new()
+	var box := BoxMesh.new()
+	box.size = Vector3(0.08,0.025,0.65)
+	shaft.mesh = box
+	shaft.position.z = -1.2
+	shaft.material_override = mat
+	aim_arrow.add_child(shaft)
+	hold_hint = Label3D.new()
+	var key := "Y" if config.get("device",-1) >= 0 else ("E" if config.get("slot",0) == 0 else "Enter")
+	hold_hint.text = key + " THROW"
+	hold_hint.position.y = 2.45
+	hold_hint.font_size = 30
+	hold_hint.pixel_size = 0.009
+	hold_hint.modulate = Color("fff0a0")
+	hold_hint.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	hold_hint.no_depth_test = true
+	add_child(hold_hint)
+	_update_hold_feedback()
+
+func _update_hold_feedback() -> void:
+	if aim_arrow == null or hold_hint == null: return
+	var holding := alive and active and (is_instance_valid(held_prop) or is_instance_valid(grabbed_target))
+	aim_arrow.visible = holding
+	aim_arrow.position.y = 0.06
+	aim_arrow.rotation.y = atan2(-facing.x,-facing.z)
+	hold_hint.visible = holding and bot == null and throw_time < 0

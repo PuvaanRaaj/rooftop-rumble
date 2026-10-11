@@ -26,11 +26,11 @@ The implementation favors direct control with momentum over realistic simulation
 | Grab duration | Up to approximately 2.2 s |
 | Elimination height | Below y = −8 |
 
-Attacks use facing and distance checks, rather than animated hitboxes. Punch creates frequent short interruptions. Shove commits to a slower cooldown for greater displacement. A held fighter or prop changes shove into a throw. Grab selects the nearest eligible target in front; press grab again to release. Jump/punch struggles advance escape time, and hits interrupt holding.
+Attacks use facing and distance checks, rather than animated hitboxes. Punch creates frequent short interruptions. Shove commits to a slower cooldown for greater displacement. A held fighter or prop changes shove into a throw. Grab selects the nearest eligible target in front; press grab again to start an animated throw. Jump/punch struggles advance escape time, and hits interrupt holding.
 
 ## Arena and objects
 
-The main roof is 14 × 10 units, framed by painted warning stripes. Three smaller roofs are separated by real gaps. Raised ventilation obstacles and six loose objects create opportunities to disrupt approaching fighters. Objects are box, cylinder, and sphere shapes standing in for crates, cans, and balls; their simple forms keep collision behavior readable.
+The main roof is 14 × 10 units, framed by painted warning stripes. Three smaller roofs are separated by real gaps. Raised ventilation obstacles and eight loose objects create opportunities to disrupt approaching fighters. Detailed wooden crates, metal barrels, and beach balls have distinct physical behavior: crates break on thrown impact, barrels roll and tumble, and balls bounce strongly. Their simple collision shapes keep behavior readable.
 
 Loose objects bounce and tumble as rigid bodies. A thrown prop can knock back an opponent during a 1.5-second danger window. It ignores its thrower and stops dealing attack impulses after its first fighter hit.
 
