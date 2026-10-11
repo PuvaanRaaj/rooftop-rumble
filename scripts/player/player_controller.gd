@@ -1,5 +1,6 @@
 class_name RumblePlayer
 extends CharacterBody3D
+signal action_sound(kind: String)
 signal knocked_out(player: RumblePlayer)
 signal impact(where: Vector3, color: Color, strength: float)
 @export var speed := 5.8
@@ -263,9 +264,11 @@ func toggle_grab() -> void:
 		grabbed_target = best
 		best.grabbed_by = self
 		best.grab_time = 0
+		action_sound.emit("grab")
 	elif best is RumbleProp:
 		held_prop = best
 		best.take(self)
+		action_sound.emit("grab")
 func _update_hold() -> void:
 	if not is_instance_valid(held_prop): held_prop = null
 	if held_prop != null:
@@ -274,6 +277,7 @@ func _update_hold() -> void:
 	if not is_instance_valid(grabbed_target): grabbed_target = null
 	_update_hold_feedback()
 func release_hold(throw_it: bool) -> void:
+	var has_target := is_instance_valid(held_prop) or is_instance_valid(grabbed_target)
 	throw_time = -1
 	followthrough = 0
 	if is_instance_valid(held_prop):
@@ -284,6 +288,7 @@ func release_hold(throw_it: bool) -> void:
 		grabbed_target = null
 		target.grabbed_by = null
 		if throw_it: target.receive_hit(facing*11+Vector3.UP*5,0.5)
+	if throw_it and has_target: action_sound.emit("throw")
 	grab_cooldown = 0.4
 	_update_hold_feedback()
 func eliminate() -> void:

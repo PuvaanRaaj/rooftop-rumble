@@ -1,6 +1,8 @@
 class_name RumbleCamera
 extends Camera3D
 var trauma := 0.0
+var map_min_span := 12.0
+var map_width := 24.0
 var home := Vector3(0,19,23)
 func _ready() -> void:
 	projection = Camera3D.PROJECTION_ORTHOGONAL
@@ -14,8 +16,12 @@ func _fit_arena() -> void:
 	if viewport_size.x <= 0 or viewport_size.y <= 0: return
 	var aspect := viewport_size.x / maxf(viewport_size.y, 1.0)
 	# Zoom closer while keeping every satellite roof inside narrower views.
-	var minimum_span := 12.0 if RumbleInput.touch_available() else 15.0
-	size = maxf(minimum_span, 24.0 / aspect)
+	var minimum_span := maxf(map_min_span, 12.0 if RumbleInput.touch_available() else 15.0)
+	size = maxf(minimum_span, map_width / aspect)
+func fit_map(minimum_span: float, width: float) -> void:
+	map_min_span = minimum_span
+	map_width = width
+	_fit_arena()
 func bump(amount: float) -> void:
 	trauma = minf(trauma + amount,0.5)
 func _process(delta: float) -> void:

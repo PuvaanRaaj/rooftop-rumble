@@ -1,6 +1,6 @@
 # Rooftop Rumble
 
-A browser-first 3D party brawler for 2–4 fighters, built with Godot and GDScript. Punch, shove, drag, and throw your friends off a rooftop while wind, slippery footing, and collapsing side roofs make staying upright harder. All meshes, UI, impact effects, and short sound effects are generated in code; no asset packs or paid dependencies are required.
+A browser-first 3D party brawler for 2–4 fighters, built with Godot and GDScript. Punch, shove, drag, and throw your friends off a rooftop while wind, slippery footing, and collapsing side roofs make staying upright harder. Meshes, UI and effects are built in code, with original synthesized music and sound effects; no asset packs or paid dependencies are required.
 
 ## Play in your browser
 
@@ -97,7 +97,7 @@ The native input suite uses synthetic physical key events; it does not prove har
 - Controller hardware behavior, simultaneous physical keyboard input, sound output, and human judgments of movement/combat feel require manual verification. Automated injected input does not establish those results.
 - CPU opponents use short committed plans, prop pickup/throws, and basic edge avoidance. They can still fall, and do not plan complex gap traversal or prop strategies.
 - Characters use stable kinematic movement and a timed grab tether, rather than full ragdolls. Picking up a prop freezes it until release.
-- One arena, no online play, no progression, no controller-driven menu navigation guarantee, and no background music. Procedural sound effects share one audio player.
+- Five selectable arenas; online play, progression and controller-driven menu navigation are future work.
 - Wind has directional text arrows and physical force; richer weather visuals would improve readability.
 
 High-value follow-ups are a friends-and-controllers playtest, tuning knockback and grab escape from that feedback, richer weather visuals, improved CPU movement around obstacles, and platform exports.
@@ -140,7 +140,7 @@ Native validation passed 20 animated-throw checks, 17 prop checks, 25 gameplay c
 
 CPU fighters use the same movement speed and combat rules as the player. They pause to assess, pursue a prop or opponent, prepare one action, commit to its direction, and recover or reposition. Their aim is imperfect and their plan uses a recent target position, so dodges can make attacks and throws miss. They can pick up real props and throw them through the same animation as human players.
 
-This is a lightweight game AI with varied decisions; human playtesting is still needed to tune how natural it feels. A difficulty selector is not included.
+This is a lightweight game AI with varied decisions; human playtesting is still needed to tune how natural it feels. Choose Easy, Medium or Hard in match setup. Difficulty changes reactions, aim errors and decision mistakes while preserving movement speed and combat physics.
 
 
 ### Phone controls
@@ -148,3 +148,9 @@ This is a lightweight game AI with varied decisions; human playtesting is still 
 Rotate horizontally and tap Play, then Start Match. Player 1 defaults to **Touchscreen**. Drag the left joystick to move; use **Jump**, **Punch**, and **Grab** on the right. Grab changes to **Throw** while holding. Multiple fingers can move and act together, and short taps remain reliable between physics frames. The small Menu button returns to the game menu.
 
 Phone play fills the available viewport, with larger menus and notch-safe margins. Rotation prompts, leaving the game page, and backgrounding pause the embedded game; lifecycle changes clear held touches. Actual iPhone/Android frame rate, thermal behavior, and thumb comfort are not established by browser emulation.
+
+### Maps, difficulty and audio
+
+Choose Skyline Terrace, Neon Junction, Sky Garden, Cargo Deck or Foundry Heights and Easy, Medium or Hard CPU difficulty before starting a match. Replay keeps those choices. Setup includes separate Music and Sounds switches; on phones, open Fighters & audio. Original looping tracks accompany matches; successful grabs and throw releases have distinct sounds. Music starts after match setup and stops on return to the menu.
+
+Content update validation: 143 map checks, 34 audio checks, 20 difficulty/setup checks and 26 match integration checks pass alongside existing gameplay, throw, prop, CPU and mobile suites. Touch-enabled Chromium selected Sky Garden, started a match and produced nonzero WebAudio output; returning to menu stopped the track, with no browser errors. Physical phone audio quality and frame rate still require device testing.

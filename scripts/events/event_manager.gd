@@ -104,10 +104,7 @@ func _clear_event() -> void:
 		_target.collision_layer = 1
 		_target.position = _target.get_meta("home_position")
 		var surface := _target.get_child(0) as MeshInstance3D
-		var material := StandardMaterial3D.new()
-		material.albedo_color = Color("395c70")
-		material.roughness = 0.82
-		surface.material_override = material
+		surface.material_override = _target.get_meta("base_material")
 	_target = null
 
 func _choose_wind() -> void:

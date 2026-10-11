@@ -12,6 +12,7 @@ var _visibility_callback: JavaScriptObject
 var effects: RumbleEffects
 var rounds := RumbleRounds.new()
 var configs: Array = []
+var match_options := {"map_id": "skyline", "difficulty": "medium"}
 var players: Array[RumblePlayer] = []
 var countdown := 0.0
 var settle := 0.0
@@ -49,6 +50,7 @@ func _ready() -> void:
 	ui = RumbleUI.new()
 	add_child(ui)
 	ui.play_requested.connect(start_match)
+	ui.audio_settings_changed.connect(_audio_settings)
 	ui.next_requested.connect(next_round)
 	ui.menu_requested.connect(return_menu)
 	events.announcement.connect(ui.announce)
@@ -60,8 +62,10 @@ func _ready() -> void:
 		_visibility_callback = JavaScriptBridge.create_callback(_browser_visibility)
 		_browser_window.addEventListener("message", _visibility_callback)
 	ui.show_menu()
-func start_match(crew: Array) -> void:
+func start_match(crew: Array, options: Dictionary = {}) -> void:
+	match_options = {"map_id": options.get("map_id", "skyline"), "difficulty": options.get("difficulty", "medium")}
 	configs = crew.duplicate(true)
+	for config in configs: config["difficulty"] = match_options.difficulty
 	rounds.begin(configs.size())
 	begin_round()
 func begin_round() -> void:
@@ -73,7 +77,10 @@ func begin_round() -> void:
 		remove_child(player)
 		player.queue_free()
 	players.clear()
+	arena.select_map(str(match_options.map_id))
+	camera.fit_map(arena.camera_min_span, arena.camera_width)
 	arena.reset()
+	effects.start_music(str(arena.map_id))
 	RumbleInput.reset()
 	rounds.round_number += 1
 	for i in range(configs.size()):
@@ -85,6 +92,7 @@ func begin_round() -> void:
 		player.facing = (-player.position*Vector3(1,0,1)).normalized()
 		player.knocked_out.connect(_eliminated)
 		player.impact.connect(_impact)
+		player.action_sound.connect(effects.play_action)
 		players.append(player)
 		if configs[i].get("kind", "keyboard") == "touch": touch_controls.player = player
 	state = State.COUNTDOWN
@@ -95,7 +103,7 @@ func begin_round() -> void:
 	ui.hide_panels()
 	_refresh_hud()
 func next_round() -> void:
-	if state == State.WINNER: start_match(configs)
+	if state == State.WINNER: start_match(configs, match_options)
 	elif state == State.RESULTS: begin_round()
 func return_menu() -> void:
 	touch_controls.set_active(false)
@@ -109,7 +117,11 @@ func return_menu() -> void:
 		player.queue_free()
 	players.clear()
 	arena.reset()
+	effects.stop_music()
 	ui.show_menu()
+func _audio_settings(music_enabled: bool, sfx_enabled: bool) -> void:
+	effects.set_music_enabled(music_enabled)
+	effects.set_sfx_enabled(sfx_enabled)
 func _physics_process(delta: float) -> void:
 	if state == State.COUNTDOWN:
 		countdown -= delta

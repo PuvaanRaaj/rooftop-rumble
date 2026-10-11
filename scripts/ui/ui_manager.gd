@@ -2,7 +2,8 @@ class_name RumbleUI
 extends CanvasLayer
 ## Native, resolution-independent menu and match presentation.
 
-signal play_requested(configs: Array)
+signal play_requested(configs: Array, options: Dictionary)
+signal audio_settings_changed(music_enabled: bool, sfx_enabled: bool)
 signal next_requested()
 signal menu_requested()
 
@@ -24,6 +25,12 @@ var _announcement_remaining := 0.0
 var _mobile := false
 var _scroll: ScrollContainer
 var _desired_height := 320.0
+var selected_map := "skyline"
+var selected_difficulty := "medium"
+var music_enabled := true
+var sfx_enabled := true
+var _mobile_details: Array[Control] = []
+var _mobile_details_open := false
 
 func _ready() -> void:
 	layer = 10
@@ -172,22 +179,54 @@ func show_setup() -> void:
 	_clear()
 	_hud.hide()
 	_selectors.clear()
+	_mobile_details.clear()
+	_mobile_details_open = false
 	if _mobile:
+		_content.add_theme_constant_override("separation", 8)
 		_desired_height = 480
 		_resize_mobile()
-	_content.add_child(_label("CHOOSE FIGHTERS" if _mobile else "ASSEMBLE YOUR CREW", 28 if _mobile else 34, ACCENT))
+	_content.add_child(_label("MATCH SETUP", 28 if _mobile else 34, ACCENT))
+	var maps: Array = RooftopArena.map_catalog()
+	var map_choice := _option_row("Map")
+	for entry in maps:
+		map_choice.add_item(entry.name)
+		map_choice.set_item_metadata(map_choice.item_count - 1, entry.id)
+		if entry.id == selected_map: map_choice.select(map_choice.item_count - 1)
+	map_choice.item_selected.connect(func(index: int) -> void:
+		selected_map = str(map_choice.get_item_metadata(index))
+	)
+	var difficulty_choice := _option_row("CPU")
+	for level in ["easy", "medium", "hard"]:
+		difficulty_choice.add_item(level.capitalize())
+		difficulty_choice.set_item_metadata(difficulty_choice.item_count - 1, level)
+		if level == selected_difficulty: difficulty_choice.select(difficulty_choice.item_count - 1)
+	difficulty_choice.item_selected.connect(func(index: int) -> void:
+		selected_difficulty = str(difficulty_choice.get_item_metadata(index))
+	)
+	if _mobile:
+		_button("START MATCH", _start_match)
+		var details := _button("Fighters & audio", func() -> void:
+			_mobile_details_open = not _mobile_details_open
+			for control in _mobile_details: control.visible = _mobile_details_open
+			for index in _selectors.size():
+				_selectors[index].get_parent().visible = _mobile_details_open and index < _count.get_selected_id()
+		)
+		details.custom_minimum_size.y = 48
 	var count_row := HBoxContainer.new()
 	count_row.add_theme_constant_override("separation", 18)
 	var fighters_label := _label("Fighters", 20)
 	fighters_label.custom_minimum_size.x = 80
 	count_row.add_child(fighters_label)
 	_count = OptionButton.new()
-	_count.custom_minimum_size.y = 64 if _mobile else 52
+	_count.custom_minimum_size.y = 48 if _mobile else 44
 	_count.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	for amount in [2, 3, 4]:
 		_count.add_item(str(amount) + " players", amount)
 	count_row.add_child(_count)
 	_content.add_child(count_row)
+	if _mobile:
+		_mobile_details.append(count_row)
+		count_row.hide()
 	for index in 4:
 		var row := HBoxContainer.new()
 		row.add_theme_constant_override("separation", 18)
@@ -195,7 +234,7 @@ func show_setup() -> void:
 		name_label.custom_minimum_size.x = 48 if _mobile else 140
 		row.add_child(name_label)
 		var select := OptionButton.new()
-		select.custom_minimum_size.y = 64 if _mobile else 52
+		select.custom_minimum_size.y = 48 if _mobile else 44
 		select.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		select.add_item("Keyboard 1" if _mobile else "Keyboard 1 · WASD", 0)
 		select.add_item("Keyboard 2" if _mobile else "Keyboard 2 · Arrows", 1)
@@ -208,17 +247,23 @@ func show_setup() -> void:
 		row.add_child(select)
 		_content.add_child(row)
 		_selectors.append(select)
-		row.visible = index < 2
+		row.visible = not _mobile and index < 2
+		if _mobile: _mobile_details.append(row)
 	_count.item_selected.connect(func(selection: int) -> void:
 		for index in 4:
-			_selectors[index].get_parent().visible = index < selection + 2
+			_selectors[index].get_parent().visible = (not _mobile or _mobile_details_open) and index < selection + 2
 	)
 	var gamepad_hint := "Press a gamepad button, then reopen setup to detect it." if OS.has_feature("web") else "Connect gamepads before opening this screen."
-	_error = _label("Left stick: move · Right buttons: act" if _mobile else gamepad_hint, 16 if _mobile else 15, MUTED)
+	_error = _label("" if _mobile else gamepad_hint, 16 if _mobile else 15, MUTED)
 	_content.add_child(_error)
-	_button("START MATCH", _start_match)
-	_controls()
-	_button("Back", show_menu)
+	if not _mobile: _button("START MATCH", _start_match)
+	var audio_row := _audio_options()
+	if _mobile:
+		_error.hide()
+		_mobile_details.append(audio_row)
+		audio_row.hide()
+	var back := _button("Back", show_menu)
+	if _mobile: back.custom_minimum_size.y = 48
 
 func _start_match() -> void:
 	var configs: Array = []
@@ -226,16 +271,18 @@ func _start_match() -> void:
 	for index in _count.get_selected_id():
 		var choice := _selectors[index].get_selected_id()
 		if choice != 2 and choice in used:
+			_error.show()
 			_error.text = "Each input can join once."
 			_error.add_theme_color_override("font_color", COLORS[1])
 			return
 		used.append(choice)
 		if choice >= 100 and not choice - 100 in Input.get_connected_joypads():
+			_error.show()
 			_error.text = "Gamepad disconnected. Reopen setup to refresh devices."
 			return
 		configs.append({"name": "Player " + str(index + 1), "color": COLORS[index], "kind": "touch" if choice == 3 else ("cpu" if choice == 2 else ("controller" if choice >= 100 else "keyboard")), "slot": 0 if choice == 3 else (choice if choice < 2 else index), "device": choice - 100 if choice >= 100 else -1})
 	hide_panels()
-	play_requested.emit(configs)
+	play_requested.emit(configs, {"map_id": selected_map, "difficulty": selected_difficulty})
 
 func hide_panels() -> void:
 	_panel.hide()
@@ -299,3 +346,42 @@ func show_results(text: String, match_over: bool) -> void:
 		_content.add_child(_label("The roof remembers every tumble.", 18, MUTED))
 	_button("PLAY AGAIN" if match_over else "NEXT ROUND", func() -> void: next_requested.emit()).grab_focus()
 	_button("MAIN MENU", func() -> void: menu_requested.emit())
+
+func _option_row(title: String) -> OptionButton:
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 18)
+	var label := _label(title, 20)
+	label.custom_minimum_size.x = 80
+	row.add_child(label)
+	var choice := OptionButton.new()
+	choice.custom_minimum_size.y = 48 if _mobile else 44
+	choice.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	row.add_child(choice)
+	_content.add_child(row)
+	return choice
+
+func _audio_options() -> HBoxContainer:
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 16)
+	var music := CheckButton.new()
+	music.text = "Music"
+	music.button_pressed = music_enabled
+	music.custom_minimum_size.y = 56 if _mobile else 44
+	music.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	music.toggled.connect(func(enabled: bool) -> void:
+		music_enabled = enabled
+		audio_settings_changed.emit(music_enabled, sfx_enabled)
+	)
+	row.add_child(music)
+	var sounds := CheckButton.new()
+	sounds.text = "Sounds"
+	sounds.button_pressed = sfx_enabled
+	sounds.custom_minimum_size.y = 56 if _mobile else 44
+	sounds.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	sounds.toggled.connect(func(enabled: bool) -> void:
+		sfx_enabled = enabled
+		audio_settings_changed.emit(music_enabled, sfx_enabled)
+	)
+	row.add_child(sounds)
+	_content.add_child(row)
+	return row

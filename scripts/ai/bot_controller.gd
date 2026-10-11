@@ -4,6 +4,13 @@ extends RefCounted
 # Plans remember positions, not the opponent's live input or velocity.
 enum Intent { ASSESS, SEEK_PROP, APPROACH_FIGHTER, ATTACK_WINDUP, AIM_THROW, RECOVER, REPOSITION }
 const MOVE_STRENGTH := 1.0
+# Difficulty changes decision quality and timing, never movement or hit strength.
+const PROFILES := {
+	"easy": {"reaction": 1.5, "aim_error": 0.42, "position_error": 0.65, "circle": 0.22, "hesitate": 0.20, "prop": 0.45},
+	"medium": {"reaction": 1.0, "aim_error": 0.20, "position_error": 0.35, "circle": 0.15, "hesitate": 0.10, "prop": 0.55},
+	"hard": {"reaction": 0.75, "aim_error": 0.10, "position_error": 0.18, "circle": 0.10, "hesitate": 0.05, "prop": 0.65},
+}
+var profile: Dictionary = PROFILES.medium
 var intent := Intent.ASSESS
 var intent_time := 0.0
 var destination := Vector3.ZERO
@@ -16,16 +23,17 @@ var pickup_plan := false
 func sample(player: RumblePlayer, arena: RooftopArena, delta: float) -> Dictionary:
 	var actions := {"move": Vector2.ZERO, "jump": false, "punch": false, "shove": false, "grab": false}
 	if not player.alive or not player.active: return actions
+	profile = PROFILES.get(str(player.config.get("difficulty", "medium")), PROFILES.medium)
 	# Interrupted plans cannot fight stun or the existing throw animation.
 	if player.stun > 0 or player.throw_time >= 0 or player.followthrough > 0:
 		intent = Intent.RECOVER
-		intent_time = randf_range(0.3, 0.55)
+		intent_time = _delay(0.3, 0.55)
 		return actions
 	intent_time -= delta
 	if is_instance_valid(player.grabbed_by):
 		if intent_time <= 0:
 			actions["punch"] = true
-			intent_time = randf_range(0.35, 0.65)
+			intent_time = _delay(0.35, 0.65)
 		intent = Intent.RECOVER
 		return actions
 	if intent == Intent.SEEK_PROP and not _available_prop(prop_target, arena):
@@ -45,11 +53,11 @@ func sample(player: RumblePlayer, arena: RooftopArena, delta: float) -> Dictiona
 			pickup_plan = intent == Intent.SEEK_PROP
 			aim = offset.normalized() if offset.length() > 0.05 else player.facing
 			intent = Intent.ATTACK_WINDUP
-			intent_time = randf_range(0.22, 0.48)
+			intent_time = _delay(0.22, 0.48)
 		elif intent_time <= 0:
 			# A chase burst ends with a short look around, even if it missed.
 			intent = Intent.RECOVER
-			intent_time = randf_range(0.16, 0.35)
+			intent_time = _delay(0.16, 0.35)
 		elif offset.length() > reach:
 			direction = offset.normalized()
 	elif intent in [Intent.ATTACK_WINDUP, Intent.AIM_THROW]:
@@ -61,12 +69,12 @@ func sample(player: RumblePlayer, arena: RooftopArena, delta: float) -> Dictiona
 			else:
 				actions[planned_action] = true
 			intent = Intent.RECOVER
-			intent_time = randf_range(0.35, 0.7)
+			intent_time = _delay(0.35, 0.7)
 	# Edge awareness overrides locomotion, never creates instant attacks.
 	if arena != null and direction != Vector3.ZERO and not arena.is_safe_position(player.global_position + direction * 1.2):
 		direction = _flat(-player.global_position).normalized()
 		intent = Intent.RECOVER
-		intent_time = randf_range(0.25, 0.45)
+		intent_time = _delay(0.25, 0.45)
 	actions["move"] = Vector2(direction.x, direction.z) * MOVE_STRENGTH
 	return actions
 
@@ -86,9 +94,9 @@ func _decide(player: RumblePlayer, arena: RooftopArena) -> void:
 		return
 	if _holding(player):
 		# Aim once and spend time lining up; a sidestep can beat this throw.
-		aim = _flat(target.global_position - player.global_position).normalized().rotated(Vector3.UP, randf_range(-0.2, 0.2))
+		aim = _flat(target.global_position - player.global_position).normalized().rotated(Vector3.UP, randf_range(-float(profile.aim_error), float(profile.aim_error)))
 		intent = Intent.AIM_THROW
-		intent_time = randf_range(0.4, 0.75)
+		intent_time = _delay(0.4, 0.75)
 		return
 	prop_target = null
 	var prop_distance := 7.0
@@ -98,30 +106,30 @@ func _decide(player: RumblePlayer, arena: RooftopArena) -> void:
 		if distance < prop_distance:
 			prop_distance = distance
 			prop_target = prop
-	if prop_target != null and randf() < 0.55:
+	if prop_target != null and randf() < float(profile.prop):
 		pickup_plan = true
 		destination = prop_target.global_position
 		planned_action = "grab"
 		intent = Intent.SEEK_PROP
-		intent_time = randf_range(0.5, 0.8)
+		intent_time = _delay(0.5, 0.8)
 		return
 	prop_target = null
 	var choice := randf()
-	if choice < 0.15:
+	if choice < float(profile.circle):
 		# Sometimes circle or hesitate instead of choosing the perfect attack.
 		var sideways := _flat(target.global_position - player.global_position).normalized().cross(Vector3.UP)
 		destination = player.global_position + sideways * (1.5 if randf() < 0.5 else -1.5)
 		intent = Intent.REPOSITION
-		intent_time = randf_range(0.4, 0.65)
-	elif choice < 0.25:
+		intent_time = _delay(0.4, 0.65)
+	elif choice < float(profile.circle) + float(profile.hesitate):
 		intent = Intent.RECOVER
-		intent_time = randf_range(0.3, 0.55)
+		intent_time = _delay(0.3, 0.55)
 	else:
-		destination = target.global_position + Vector3(randf_range(-0.35, 0.35), 0, randf_range(-0.35, 0.35))
+		destination = target.global_position + Vector3(randf_range(-float(profile.position_error), float(profile.position_error)), 0, randf_range(-float(profile.position_error), float(profile.position_error)))
 		var attack_choice := randf()
 		planned_action = "grab" if attack_choice < 0.3 else ("shove" if attack_choice < 0.6 else "punch")
 		intent = Intent.APPROACH_FIGHTER
-		intent_time = randf_range(0.4, 0.75)
+		intent_time = _delay(0.4, 0.75)
 
 func _valid_target() -> bool:
 	return is_instance_valid(target) and target.is_inside_tree() and target.alive
@@ -134,3 +142,6 @@ func _available_prop(prop, arena: RooftopArena) -> bool:
 
 func _flat(value: Vector3) -> Vector3:
 	return value * Vector3(1, 0, 1)
+
+func _delay(minimum: float, maximum: float) -> float:
+	return randf_range(minimum, maximum) * float(profile.reaction)

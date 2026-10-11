@@ -31,3 +31,11 @@ jobs:
         run: .tools/godot/Godot_v4.5.2-stable_linux.x86_64 --headless --path . --fixed-fps 60 --script tests/test_bots.gd
       - name: Mobile multitouch gameplay
         run: .tools/godot/Godot_v4.5.2-stable_linux.x86_64 --headless --path . --fixed-fps 60 --script tests/test_mobile_input.gd
+      - name: Selectable maps
+        run: .tools/godot/Godot_v4.5.2-stable_linux.x86_64 --headless --path . --fixed-fps 60 --script tests/test_maps.gd
+      - name: Difficulty profiles
+        run: .tools/godot/Godot_v4.5.2-stable_linux.x86_64 --headless --path . --fixed-fps 60 --script tests/test_difficulty.gd
+      - name: Original audio assets
+        run: .tools/godot/Godot_v4.5.2-stable_linux.x86_64 --headless --path . --fixed-fps 60 --script tests/test_audio.gd
+      - name: Match setup integration
+        run: .tools/godot/Godot_v4.5.2-stable_linux.x86_64 --headless --path . --fixed-fps 60 --script tests/test_match_setup.gd

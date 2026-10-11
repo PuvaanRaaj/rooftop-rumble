@@ -42,3 +42,10 @@ AI references must be both valid and inside the scene tree before reading world 
 Phone screenshots still showed Keyboard 1 and no action controls. Implement touch as a real input source rather than keyboard event emulation: a shared Godot CanvasLayer owns independent finger IDs, a floating joystick, action buttons, and contextual Grab/Throw. Latch action presses until physics samples them so fast taps and release/repress are not lost. Cancellation and lifecycle resets discard pending actions.
 
 Phones default to one touch-controlled human plus CPUs. Use 960×540 landscape and 540×960 portrait logical UI bases, compact scrollable menus, larger buttons, and a viewport-filling web embed with safe-area margins. Browser visibility messages pause the game while the rotation prompt/page hides it and clear touches before resume. Keep desktop keyboard/controller routing and arena physics unchanged.
+
+
+## Selectable content and original audio (2026-10-12)
+
+Keep arena selection and difficulty in explicit match options, separate from input assignments. Preserve options across replay and use Medium as the existing CPU behavior. Difficulty changes timing and decision errors instead of movement or damage statistics. Rebuild arenas only between matches after stopping hazards and releasing fighters, and fit the camera to the selected footprint.
+
+Use small original PCM music loops and action cues rather than external licensed assets or continuous runtime audio generators. Separate music from polyphonic effects so impacts cannot interrupt a track; allow independent toggles in setup. Successful pickup and physical throw release emit cues, while canceled wind-up does not.
