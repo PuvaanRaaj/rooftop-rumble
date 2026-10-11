@@ -116,7 +116,7 @@ Godot 4.5.2 editor import and headless scene launch passed. The rules suite pass
 
 The single-thread web export loaded in Chromium 151 using WebGL 2 with no console errors. Browser interaction reached crew setup, started a keyboard-versus-CPU round, accepted movement/action keys, showed a round result, and returned to the menu with Escape. The landing page had no horizontal overflow at a 390-pixel viewport. These synthetic browser inputs do not verify physical keyboard rollover, controllers, sound quality, or other browsers.
 
-A clean Ubuntu GitHub Actions build downloaded the pinned Linux Godot engine and verified web template, then exported successfully. Check the [browser build workflow](https://github.com/PuvaanRaaj/rooftop-rumble/actions/workflows/web-build.yml) for the latest commit. The Vercel hosting configuration is prepared; a Vercel deployment has not been created.
+A clean Ubuntu GitHub Actions build downloaded the pinned Linux Godot engine and verified web template, then exported successfully. Check the [browser build workflow](https://github.com/PuvaanRaaj/rooftop-rumble/actions/workflows/web-build.yml) for the latest commit. The public Vercel deployment is [rooftop-rumble-lake.vercel.app](https://rooftop-rumble-lake.vercel.app).
 
 ![Browser launch page](docs/browser-preview.png)
 

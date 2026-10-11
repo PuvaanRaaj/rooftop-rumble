@@ -96,7 +96,7 @@ func _label(text: String, size := 20, color := CREAM) -> Label:
 
 func _clear() -> void:
 	for child in _content.get_children():
-		_content.remove_child(child)
+		child.hide()
 		child.queue_free()
 	_panel.show()
 	_countdown.text = ""
@@ -198,7 +198,7 @@ func show_countdown(text: String) -> void:
 
 func update_hud(round_number: int, players: Array) -> void:
 	for child in _hud.get_children():
-		_hud.remove_child(child)
+		child.hide()
 		child.queue_free()
 	var round_label := _label("ROUND " + str(round_number) + "\nFIRST TO 3", 19, ACCENT)
 	_hud.add_child(round_label)
