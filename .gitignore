@@ -1,0 +1,10 @@
+.godot/
+exports/
+.DS_Store
+.tools/
+dist/
+node_modules/
+.vercel/
+.env
+.env.*
+test-results/

@@ -1,0 +1,12 @@
+{
+  "name": "rooftop-rumble",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "engines": { "node": ">=22" },
+  "scripts": {
+    "build": "node scripts/web/build.mjs",
+    "dev": "node scripts/web/serve.mjs",
+    "serve": "node scripts/web/serve.mjs"
+  }
+}
