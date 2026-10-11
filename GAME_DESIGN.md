@@ -51,3 +51,8 @@ Hazards reset on completion or a round transition. Collapse affects only a side 
 Oversized heads, short arms, pastel fighters, dark roof surfaces, emissive paint, rooftop signage, and a fixed angled camera support readability. Native menus use navy, cream, and warm yellow. Impacts emit colored fragments, hit flashes, screen shake, and short procedural tones. Jump/landing and attack poses animate the character without a skeleton.
 
 This MVP deliberately omits online networking, progression, customization, full ragdolls, external assets, and music. The next design decision should follow human playtests: tune edge recoverability, attack frequency, and grab escape before adding content.
+
+
+## Default CPU pacing
+
+CPUs move at 2.9 units/s versus the human player's 5.8. Each round gives a two-second opening grace after countdown. CPUs stop pursuing within 1.4 units, retreat when overlapping within 0.9, and take 1.1–1.7 seconds between attack decisions plus a 0.5-second rest. Shoves and grabs are occasional. Edge recovery remains active during grace/rest; the player can outrun CPUs to get space for props.

@@ -94,7 +94,7 @@ The native input suite uses synthetic physical key events; it does not prove har
 ## Current limitations
 
 - Controller hardware behavior, simultaneous physical keyboard input, sound output, and human judgments of movement/combat feel require manual verification. Automated injected input does not establish those results.
-- CPU opponents use simple target chasing and short look-ahead edge avoidance. They can still fall, and do not plan complex gap traversal or prop strategies.
+- CPU opponents use beginner pacing, simple target chasing, and short look-ahead edge avoidance. They can still fall, and do not plan complex gap traversal or prop strategies.
 - Characters use stable kinematic movement and a timed grab tether, rather than full ragdolls. Picking up a prop freezes it until release.
 - One arena, no online play, no progression, no controller-driven menu navigation guarantee, and no background music. Procedural sound effects share one audio player.
 - Wind has directional text arrows and physical force; richer weather visuals would improve readability.
@@ -133,3 +133,8 @@ Tap **E / Enter / gamepad Y** to grab, then tap again to throw. A direction arro
 The roof now has eight props: wooden crates that break into fading shards after thrown impacts, heavier metal barrels that roll and tumble, and colorful beach balls with stronger bounce. Props reset between rounds. Automated throw and prop suites cover timing, cancellation, physical flight, bounce, impact safety, and cleanup.
 
 Native validation passed 20 animated-throw checks, 17 prop checks, 25 gameplay checks, and a full four-CPU match. The exported game loaded and completed browser menu/match/input checks without console errors. Carry, wind-up, and release snapshots are saved under `docs/throw-*.png`.
+
+
+### Friendlier CPU pacing
+
+Default CPU opponents run at half the human player's speed, give you a short opening grace period, stop chasing at close range, and pause between attacks. You can outrun them to make room for grabbing and throwing props. This is the default CPU behavior; a difficulty selector is not included.

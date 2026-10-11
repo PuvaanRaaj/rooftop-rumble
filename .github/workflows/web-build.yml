@@ -25,3 +25,7 @@ jobs:
         run: .tools/godot/Godot_v4.5.2-stable_linux.x86_64 --headless --path . --fixed-fps 60 --script tests/test_throw.gd
       - name: Prop physics
         run: .tools/godot/Godot_v4.5.2-stable_linux.x86_64 --headless --path . --fixed-fps 60 --script tests/test_props.gd
+      - name: CPU pacing
+        run: .tools/godot/Godot_v4.5.2-stable_linux.x86_64 --headless --path . --fixed-fps 60 --script tests/test_bot_pacing.gd
+      - name: CPU match completion
+        run: .tools/godot/Godot_v4.5.2-stable_linux.x86_64 --headless --path . --fixed-fps 60 --script tests/test_bots.gd

@@ -15,6 +15,7 @@ Browser-first local 3D party brawler for 2–4 fighters. Godot 4.5.2 and GDScrip
 - Gameplay: `godot --headless --path . --script tests/test_gameplay.gd`.
 - Throws: `godot --headless --path . --fixed-fps 60 --script tests/test_throw.gd`.
 - Props: `godot --headless --path . --fixed-fps 60 --script tests/test_props.gd`.
+- CPU pacing: `godot --headless --path . --fixed-fps 60 --script tests/test_bot_pacing.gd`.
 - CPU match: `godot --headless --path . --fixed-fps 60 --script tests/test_bots.gd`.
 - Native input: `godot --path . --script tests/test_input.gd`.
 - No standalone GDScript linter is configured; import and runtime suites catch engine errors.

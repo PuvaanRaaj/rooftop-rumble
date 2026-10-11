@@ -21,3 +21,8 @@ Improve current art through suit/face detail, roof seams, architectural trim, qu
 Use the existing Grab button for pickup and a second tap for a timed throw; preserve Shove as a throw shortcut. Keep `release_hold(true)` immediate so physics integration and existing callers retain a predictable primitive; `begin_throw()` owns wind-up, locked aim, one release, and follow-through. Release props in front of the fighter to avoid throwing through their collider. Cancel pending actions during hits, escape, elimination, inactive rounds, and menu/reset cleanup.
 
 Differentiate eight props through physical behavior and recognizable modeling: three breakable wooden crates, three rolling metal barrels, and two bouncing beach balls. Shards remain children of the broken crate so arena reset owns all effects and cannot leave debris behind. Guard actual collision callbacks against changing another carried body's physics state during query flushing.
+
+
+## Beginner CPU pacing (2026-10-11)
+
+The user found the default CPU overwhelming: it chased at full human speed into contact and attacked every 0.35–0.9 seconds. Give the CPU 50% movement input, two seconds of grace after countdown, 1.4-unit chase stopping distance, retreat below 0.9 units, deliberate in-range reaction delay, and half-second rests after attacks. Keep edge avoidance active during rests and human speed unchanged. Stationary bots face opponents without changing locked throw aim. This is the default; harder difficulty tiers can be added separately.
