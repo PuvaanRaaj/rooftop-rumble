@@ -21,7 +21,7 @@ var prop_target: RumbleProp
 var pickup_plan := false
 
 func sample(player: RumblePlayer, arena: RooftopArena, delta: float) -> Dictionary:
-	var actions := {"move": Vector2.ZERO, "jump": false, "punch": false, "shove": false, "grab": false}
+	var actions := {"move": Vector2.ZERO, "jump": false, "punch": false, "shove": false, "grab": false, "special": false}
 	if not player.alive or not player.active: return actions
 	profile = PROFILES.get(str(player.config.get("difficulty", "medium")), PROFILES.medium)
 	# Interrupted plans cannot fight stun or the existing throw animation.
@@ -127,7 +127,10 @@ func _decide(player: RumblePlayer, arena: RooftopArena) -> void:
 	else:
 		destination = target.global_position + Vector3(randf_range(-float(profile.position_error), float(profile.position_error)), 0, randf_range(-float(profile.position_error), float(profile.position_error)))
 		var attack_choice := randf()
-		planned_action = "grab" if attack_choice < 0.3 else ("shove" if attack_choice < 0.6 else "punch")
+		if player.special_cooldown <= 0 and randf() < 0.28:
+			planned_action = "special"
+		else:
+			planned_action = "grab" if attack_choice < 0.3 else ("shove" if attack_choice < 0.6 else "punch")
 		intent = Intent.APPROACH_FIGHTER
 		intent_time = _delay(0.4, 0.75)
 

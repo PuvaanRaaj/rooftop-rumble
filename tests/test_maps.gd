@@ -19,7 +19,7 @@ func run() -> void:
 	var events := RumbleEvents.new()
 	root.add_child(events)
 	events.setup(arena)
-	check(RooftopArena.map_catalog().size() == 5, "Five maps are selectable")
+	check(RooftopArena.map_catalog().size() == 7, "Seven maps are selectable")
 	var layouts := {}
 	for entry in RooftopArena.map_catalog():
 		arena.select_map(entry.id)
@@ -63,7 +63,7 @@ func run() -> void:
 		arena.select_map(entry.id)
 		check(arena.get_child_count() == children, "Selecting current map does not duplicate scenery")
 		await physics_frame
-	check(layouts.size() == 5, "Maps have five distinct physical layouts and prop arrangements")
+	check(layouts.size() == 7, "Maps have seven distinct physical layouts and prop arrangements")
 	arena.select_map("unknown")
 	check(arena.map_id == "skyline", "Unknown map falls back safely")
 	check(not arena.is_safe_position(Vector3(30, 0, 30)), "Outside map remains unsafe")

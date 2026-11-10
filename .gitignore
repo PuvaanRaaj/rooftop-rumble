@@ -4,6 +4,7 @@ exports/
 .tools/
 dist/
 node_modules/
+docs/*.import
 .vercel/
 .env
 .env.*

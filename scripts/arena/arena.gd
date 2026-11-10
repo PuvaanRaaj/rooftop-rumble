@@ -16,7 +16,9 @@ static func map_catalog() -> Array:
 		{"id": "neon", "name": "Neon Junction", "description": "A neon square with narrow side decks."},
 		{"id": "garden", "name": "Sky Garden", "description": "Wide terraces, trees, and chunky planters."},
 		{"id": "cargo", "name": "Cargo Deck", "description": "Shipping containers and plenty of throwable crates."},
-		{"id": "foundry", "name": "Foundry Heights", "description": "A large square surrounded by machinery."}
+		{"id": "foundry", "name": "Foundry Heights", "description": "A large square surrounded by machinery."},
+		{"id": "heliport", "name": "Helipad Alpha", "description": "High-altitude flight deck with landing circle and corner pads."},
+		{"id": "solar", "name": "Solar Station", "description": "Eco-rooftop with solar arrays, battery hubs, and sky balconies."}
 	]
 
 func select_map(id: String) -> void:
@@ -135,6 +137,10 @@ func _spawn_props() -> void:
 		locations.append_array([Vector3(-6.5, 0.75, -1.2), Vector3(6.5, 0.75, 1.2)])
 	elif map_id == "foundry":
 		locations.append_array([Vector3(-2.5, 0.75, -5.5), Vector3(2.5, 0.75, 5.5)])
+	elif map_id == "heliport":
+		locations.append_array([Vector3(-5.5, 0.75, 0), Vector3(5.5, 0.75, 0)])
+	elif map_id == "solar":
+		locations.append(Vector3(0, 0.75, 4.0))
 	var colors := [Color("ff9c5d"), Color("ef6584"), Color("53cbbc")]
 	var prop_script := load("res://scripts/objects/physics_object.gd")
 	for i in locations.size():
@@ -294,6 +300,16 @@ func _build_variant() -> void:
 			surface = Color("4f515b")
 			accent = Color("ff9852")
 			camera_min_span = 16.0
+		"heliport":
+			size = Vector3(15, 0.7, 15)
+			surface = Color("242d3d")
+			accent = Color("ffd642")
+			camera_min_span = 15.0
+		"solar":
+			size = Vector3(17, 0.7, 11)
+			surface = Color("20333d")
+			accent = Color("47e5bc")
+			camera_min_span = 14.0
 	_floor(Vector3.ZERO, size, surface, false)
 	_box(self, Vector3(0, -8.4, 0), Vector3(size.x - 0.2, 16, size.z - 0.2), surface.darkened(0.55))
 	# Flat edge markings retain the ability to shove fighters off every arena.
@@ -347,6 +363,26 @@ func _build_variant() -> void:
 			for x in [-4.8, 0.0, 4.8]:
 				_box(self, Vector3(x, 0.01, 0), Vector3(0.045, 0.015, 14), Color("30343d"))
 			_sign("FOUNDRY HEIGHTS", Vector3(4.5, 2.3, -7.8), accent)
+		"heliport":
+			_floor(Vector3(0, -0.12, -9.5), Vector3(5.5, 0.7, 3), Color("3d4b61"), true)
+			_box(self, Vector3(-1.4, 0.02, 0), Vector3(0.45, 0.025, 3.8), accent, true)
+			_box(self, Vector3(1.4, 0.02, 0), Vector3(0.45, 0.025, 3.8), accent, true)
+			_box(self, Vector3(0, 0.02, 0), Vector3(2.8, 0.025, 0.45), accent, true)
+			_ring(Vector3(0, 0.028, 0), accent, 3.4)
+			for x in [-5.8, 5.8]:
+				for z in [-5.8, 5.8]:
+					_solid_box(Vector3(x, 0.5, z), Vector3(0.7, 1.0, 0.7), Color("323c4d"))
+					_box(self, Vector3(x, 1.05, z), Vector3(0.3, 0.3, 0.3), Color("ff4242"), true)
+			_sign("HELIPAD ALPHA", Vector3(0, 2.3, -7.3), accent)
+		"solar":
+			_floor(Vector3(-10.2, -0.12, 0), Vector3(3.2, 0.7, 4.5), Color("2b4352"), true)
+			for x in [-5.5, 5.5]:
+				for z in [-3.8, 3.8]:
+					_solid_box(Vector3(x, 0.4, z), Vector3(1.6, 0.8, 1.2), Color("1a2730"))
+					_box(self, Vector3(x, 0.82, z), Vector3(1.5, 0.04, 1.1), Color("3d688a"), true)
+			_solid_box(Vector3(0, 0.75, -4.2), Vector3(3.2, 1.5, 1.0), Color("1a2730"))
+			_box(self, Vector3(0, 0.75, -3.68), Vector3(2.8, 0.2, 0.04), accent, true)
+			_sign("SOLAR STATION", Vector3(4.5, 2.3, -5.3), accent)
 	# Facade windows are batched on all maps to keep mobile draw calls modest.
 	var windows: Array[Transform3D] = []
 	for y in [-2.5, -5.0, -7.5, -10.0, -12.5]:

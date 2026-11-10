@@ -49,9 +49,30 @@ Godot's Compatibility renderer is configured. Native builds target macOS, Window
 | Punch | F | K | X / left face button |
 | Shove / throw held fighter or object | H | L | B / right face button |
 | Grab / pick up / throw | G (or E) | Enter | Y / top face button |
+| Hero Superpower | Q (or R) | O (or P) | RB / Right Bumper |
 | Return to main menu | Escape | Escape | Keyboard Escape |
 
-Left Shift is also accepted for Keyboard 2. Controller face buttons use Godot's standard gamepad mapping; printed symbols vary by controller. Connect controllers **before opening player setup**. Each keyboard layout and controller can join once; multiple CPU opponents are allowed. The default crew is Keyboard 1 and one CPU.
+Left Shift is also accepted for Keyboard 2. Touchscreens feature an on-screen **POWER** button. Controller face buttons use Godot's standard gamepad mapping; printed symbols vary by controller. Connect controllers **before opening player setup**. Each keyboard layout and controller can join once; multiple CPU opponents are allowed. The default crew is Keyboard 1 and one CPU.
+
+### Heroes & Superpowers
+
+Each fighter can select from four distinct procedural hero archetypes with unique visual accessories, animations, and tactical powers:
+
+- **Bolt**: Speed runner with aerodynamic visor and lightning crest. Power: **Dash Strike** — sudden high-speed burst forward knocking back any opponent in the path.
+- **Atlas**: Heavy juggernaut with iron faceplate, broad pauldrons, and heavy gauntlets. Power: **Ground Slam** — creates an expanding radial shockwave that launches nearby fighters upward and outward.
+- **Ember**: Blazing striker with flame-swept horns and fiery chest badge. Power: **Flame Burst** — fires an explosive conical flame blast forward.
+- **Frost**: Cryo specialist with crystalline ice horns and ice pauldrons. Power: **Freeze Pulse** — emits an icy nova that slows opponents down and knocks them back.
+
+### Arenas (7 Rooftops)
+
+Choose between seven distinct rooftop arenas with custom geometry, props, and hazard zones:
+1. **Skyline Terrace**: Classic sunny urban rooftop with jumpable side decks.
+2. **Neon Junction**: Night skyline featuring dual joined platforms.
+3. **Sky Garden**: Wide green terraces with trees and chunky planters.
+4. **Cargo Deck**: Industrial rooftop with shipping containers and throwable crates.
+5. **Foundry Heights**: Sunset industrial deck surrounded by heavy machinery.
+6. **Helipad Alpha**: High-altitude flight deck with landing circle markings, perimeter beacons, and gantry.
+7. **Solar Station**: Eco-tech rooftop featuring angled solar arrays, energy battery banks, and observation balcony.
 
 Face a nearby target to punch, shove, or grab. Tap Grab to pick up a fighter or prop, then tap again to throw with a visible wind-up and follow-through. Shove also throws while holding. Punch breaks a grab when fighting back; it does not throw your held target. Carrying slows movement. Repeated jump or punch inputs help a grabbed fighter escape, and grabs expire automatically.
 

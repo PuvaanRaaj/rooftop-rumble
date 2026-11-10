@@ -20,6 +20,13 @@ var _countdown: Label
 var _announcement: Label
 var _count: OptionButton
 var _selectors: Array[OptionButton] = []
+var _hero_selectors: Array[OptionButton] = []
+const HERO_OPTIONS := [
+	{"id": "bolt", "label": "Bolt · Dash"},
+	{"id": "ember", "label": "Ember · Flame"},
+	{"id": "atlas", "label": "Atlas · Slam"},
+	{"id": "frost", "label": "Frost · Freeze"}
+]
 var _error: Label
 var _announcement_remaining := 0.0
 var _mobile := false
@@ -151,10 +158,10 @@ func _button(text: String, callback: Callable) -> Button:
 func _controls() -> void:
 	if _mobile:
 		return
-	_content.add_child(_label("KEYBOARD 1   WASD / Arrows · Space · F / G / H", 16, MUTED))
-	_content.add_child(_label("KEYBOARD 2   Arrows · Shift · K / L / Enter", 16, MUTED))
-	_content.add_child(_label("GAMEPAD   Left stick · A jump · X punch · B shove · Y grab/throw", 15, MUTED))
-	_content.add_child(_label("Tap G / Enter / Y to grab. Tap again to THROW!", 15, ACCENT))
+	_content.add_child(_label("KEYBOARD 1   WASD / Arrows · Space · F / G / H · Q Power", 15, MUTED))
+	_content.add_child(_label("KEYBOARD 2   Arrows · Shift · K / L / Enter · O Power", 15, MUTED))
+	_content.add_child(_label("GAMEPAD   Left stick · A jump · X punch · B shove · Y grab/throw · RB power", 14, MUTED))
+	_content.add_child(_label("Tap G / Enter / Y to grab & throw · Q / O / RB for Hero Power!", 15, ACCENT))
 
 func show_menu() -> void:
 	_clear()
@@ -179,6 +186,7 @@ func show_setup() -> void:
 	_clear()
 	_hud.hide()
 	_selectors.clear()
+	_hero_selectors.clear()
 	_mobile_details.clear()
 	_mobile_details_open = false
 	if _mobile:
@@ -229,10 +237,18 @@ func show_setup() -> void:
 		count_row.hide()
 	for index in 4:
 		var row := HBoxContainer.new()
-		row.add_theme_constant_override("separation", 18)
+		row.add_theme_constant_override("separation", 14 if _mobile else 18)
 		var name_label := _label(("P" if _mobile else "PLAYER ") + str(index + 1), 20, COLORS[index])
-		name_label.custom_minimum_size.x = 48 if _mobile else 140
+		name_label.custom_minimum_size.x = 44 if _mobile else 110
 		row.add_child(name_label)
+		var hero_select := OptionButton.new()
+		hero_select.custom_minimum_size.y = 48 if _mobile else 44
+		hero_select.custom_minimum_size.x = 95 if _mobile else 135
+		for h_idx in HERO_OPTIONS.size():
+			hero_select.add_item(HERO_OPTIONS[h_idx].label, h_idx)
+		hero_select.select(index % HERO_OPTIONS.size())
+		row.add_child(hero_select)
+		_hero_selectors.append(hero_select)
 		var select := OptionButton.new()
 		select.custom_minimum_size.y = 48 if _mobile else 44
 		select.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -282,7 +298,8 @@ func _start_match() -> void:
 			_error.show()
 			_error.text = "Gamepad disconnected. Reopen setup to refresh devices."
 			return
-		configs.append({"name": "Player " + str(index + 1), "color": COLORS[index], "kind": "touch" if choice == 3 else ("cpu" if choice == 2 else ("controller" if choice >= 100 else "keyboard")), "slot": 0 if choice == 3 else (choice if choice < 2 else index), "device": choice - 100 if choice >= 100 else -1})
+		var hero_id: String = HERO_OPTIONS[_hero_selectors[index].get_selected_id() if _hero_selectors.size() > index else (index % 4)].id
+		configs.append({"name": "Player " + str(index + 1), "hero": hero_id, "color": COLORS[index], "kind": "touch" if choice == 3 else ("cpu" if choice == 2 else ("controller" if choice >= 100 else "keyboard")), "slot": 0 if choice == 3 else (choice if choice < 2 else index), "device": choice - 100 if choice >= 100 else -1})
 	hide_panels()
 	play_requested.emit(configs, {"map_id": selected_map, "difficulty": selected_difficulty})
 

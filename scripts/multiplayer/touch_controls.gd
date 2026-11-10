@@ -60,11 +60,12 @@ func control_center(action: String) -> Vector2:
 		"jump": return Vector2(size.x - 78, size.y - 192)
 		"punch": return Vector2(size.x - 208, size.y - 94)
 		"grab": return Vector2(size.x - 78, size.y - 72)
+		"special": return Vector2(size.x - 208, size.y - 204)
 		"menu": return Vector2(size.x - 38, 38)
 	return joystick_center()
 
 func control_rect(action: String) -> Rect2:
-	var radius := 26.0 if action == "menu" else 52.0
+	var radius := 26.0 if action == "menu" else (44.0 if action == "special" else 52.0)
 	return Rect2(control_center(action) - Vector2.ONE * radius, Vector2.ONE * radius * 2)
 
 func _input(event: InputEvent) -> void:
@@ -88,8 +89,9 @@ func _input(event: InputEvent) -> void:
 			get_viewport().set_input_as_handled()
 			menu_requested.emit()
 			return
-		for action in ["jump", "punch", "grab"]:
-			if event.position.distance_to(control_center(action)) <= 52 and not action in _pointers.values():
+		for action in ["jump", "punch", "grab", "special"]:
+			var max_dist := 44.0 if action == "special" else 52.0
+			if event.position.distance_to(control_center(action)) <= max_dist and not action in _pointers.values():
 				_pointers[event.index] = action
 				RumbleInput.press_touch(action)
 				get_viewport().set_input_as_handled()
@@ -116,15 +118,15 @@ func draw_controls(surface: Control) -> void:
 	surface.draw_circle(_stick_origin, 74, navy)
 	surface.draw_arc(_stick_origin, 74, 0, TAU, 64, Color(0.72, 0.86, 1.0, 0.65), 3, true)
 	surface.draw_circle(_stick_origin + _stick_offset, 34, Color(0.68, 0.83, 0.96, 0.70))
-	for action in ["jump", "punch", "grab", "menu"]:
+	for action in ["jump", "punch", "grab", "special", "menu"]:
 		var center := control_center(action)
-		var radius := 26.0 if action == "menu" else 52.0
+		var radius := 26.0 if action == "menu" else (44.0 if action == "special" else 52.0)
 		var pressed: bool = RumbleInput.touch_held.get(action, false)
 		surface.draw_circle(center, radius, gold if pressed else navy)
 		surface.draw_arc(center, radius, 0, TAU, 48, gold, 3, true)
-		var label: String = "MENU" if action == "menu" else action.to_upper()
+		var label: String = "MENU" if action == "menu" else ("POWER" if action == "special" else action.to_upper())
 		if action == "grab" and is_instance_valid(player) and (is_instance_valid(player.held_prop) or is_instance_valid(player.grabbed_target)):
 			label = "THROW"
-		var font_size := 12 if action == "menu" else 19
+		var font_size := 12 if action == "menu" else (16 if action == "special" else 19)
 		var text_size := font.get_string_size(label, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size)
 		surface.draw_string(font, center + Vector2(-text_size.x / 2, font_size * 0.35), label, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size, Color(0.05, 0.1, 0.17) if pressed else Color.WHITE)

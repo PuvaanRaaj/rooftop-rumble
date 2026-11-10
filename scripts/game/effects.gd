@@ -59,7 +59,14 @@ func set_sfx_enabled(enabled: bool) -> void:
 		for voice in voices: voice.stop()
 
 func play_action(kind: String) -> void:
-	if action_sounds.has(kind): _play_sfx(action_sounds[kind])
+	if action_sounds.has(kind):
+		_play_sfx(action_sounds[kind])
+	elif sfx_enabled:
+		match kind:
+			"dash": tone(360.0, 0.14)
+			"slam": tone(90.0, 0.28)
+			"flame": tone(220.0, 0.20)
+			"freeze": tone(520.0, 0.24)
 
 func _play_sfx(stream: AudioStream) -> void:
 	if not sfx_enabled or DisplayServer.get_name() == "headless": return
