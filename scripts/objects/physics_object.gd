@@ -18,8 +18,8 @@ func configure(type: int, color: Color) -> void:
 func _ready() -> void:
 	add_to_group("props")
 	contact_monitor = true
-	max_contacts_reported = 6
-	continuous_cd = true
+	max_contacts_reported = 4
+	continuous_cd = false
 	physics_material_override = PhysicsMaterial.new()
 	_visuals = Node3D.new()
 	add_child(_visuals)
@@ -73,41 +73,61 @@ func _ready() -> void:
 		angular_damp = 0.08
 		# Alternating curved panels remain readable while the ball spins.
 		var colors := [Color("ff625c"), Color("fff4ca"), Color("46bdf4"), Color("fff4ca"), Color("ffd54b"), Color("fff4ca")]
-		var vertices := PackedVector3Array()
 		for panel in range(6):
-			vertices.clear()
-			for latitude in range(12):
-				for longitude in range(4):
-					var a := _sphere_point(latitude, panel * 4 + longitude)
-					var b := _sphere_point(latitude + 1, panel * 4 + longitude)
-					var c := _sphere_point(latitude + 1, panel * 4 + longitude + 1)
-					var d := _sphere_point(latitude, panel * 4 + longitude + 1)
-					vertices.append_array(PackedVector3Array([a, b, c, a, c, d]))
-			var surface := SurfaceTool.new()
-			surface.begin(Mesh.PRIMITIVE_TRIANGLES)
-			for vertex in vertices:
-				surface.set_normal(vertex.normalized())
-				surface.add_vertex(vertex)
-			_mesh(surface.commit(), Vector3.ZERO, colors[panel])
+			_mesh(_get_beach_ball_mesh(panel), Vector3.ZERO, colors[panel])
 		var hitbox := SphereShape3D.new()
 		hitbox.radius = 0.4
 		shape.shape = hitbox
 	add_child(shape)
 	body_entered.connect(_on_body_entered)
 
-func _sphere_point(latitude: int, longitude: int) -> Vector3:
+static var _beach_ball_meshes: Array[Mesh] = []
+static var _shard_mesh: BoxMesh
+static var _shard_material: StandardMaterial3D
+
+static func _get_beach_ball_mesh(panel: int) -> Mesh:
+	if _beach_ball_meshes.size() >= 6:
+		return _beach_ball_meshes[panel]
+	_beach_ball_meshes.clear()
+	for p in range(6):
+		var vertices := PackedVector3Array()
+		for latitude in range(12):
+			for longitude in range(4):
+				var a := _sphere_point_static(latitude, p * 4 + longitude)
+				var b := _sphere_point_static(latitude + 1, p * 4 + longitude)
+				var c := _sphere_point_static(latitude + 1, p * 4 + longitude + 1)
+				var d := _sphere_point_static(latitude, p * 4 + longitude + 1)
+				vertices.append_array(PackedVector3Array([a, b, c, a, c, d]))
+		var surface := SurfaceTool.new()
+		surface.begin(Mesh.PRIMITIVE_TRIANGLES)
+		for vertex in vertices:
+			surface.set_normal(vertex.normalized())
+			surface.add_vertex(vertex)
+		_beach_ball_meshes.append(surface.commit())
+	return _beach_ball_meshes[panel]
+
+static func _sphere_point_static(latitude: int, longitude: int) -> Vector3:
 	var phi := PI * latitude / 12.0
 	var theta := TAU * longitude / 24.0
 	return Vector3(sin(phi) * cos(theta), cos(phi), sin(phi) * sin(theta)) * 0.4
+
+func _sphere_point(latitude: int, longitude: int) -> Vector3:
+	return _sphere_point_static(latitude, longitude)
+
+static var _prop_mat_cache: Dictionary = {}
 
 func _mesh(resource: Mesh, offset: Vector3, color: Color, metallic: float = 0.0) -> MeshInstance3D:
 	var instance := MeshInstance3D.new()
 	instance.mesh = resource
 	instance.position = offset
-	var mat := StandardMaterial3D.new()
-	mat.albedo_color = color
-	mat.roughness = 0.55
-	mat.metallic = metallic
+	var key: int = color.to_rgba32() | (int(round(metallic * 100)) << 32)
+	var mat: StandardMaterial3D = _prop_mat_cache.get(key)
+	if mat == null:
+		mat = StandardMaterial3D.new()
+		mat.albedo_color = color
+		mat.roughness = 0.55
+		mat.metallic = metallic
+		_prop_mat_cache[key] = mat
 	instance.material_override = mat
 	_visuals.add_child(instance)
 	return instance
@@ -118,8 +138,11 @@ func _box(offset: Vector3, size: Vector3, color: Color) -> MeshInstance3D:
 	return _mesh(box, offset, color)
 
 func _physics_process(delta: float) -> void:
-	dangerous_time = maxf(0, dangerous_time - delta)
-	if dangerous_time > 0: _flight_velocity = linear_velocity
+	if dangerous_time > 0:
+		dangerous_time = maxf(0, dangerous_time - delta)
+		_flight_velocity = linear_velocity
+		if dangerous_time == 0:
+			continuous_cd = false
 	if global_position.y < -25: queue_free()
 
 func _on_body_entered(body: Node) -> void:
@@ -135,9 +158,11 @@ func _hit(body: Node, impact_velocity: Vector3 = Vector3.INF) -> void:
 	if body.has_method("receive_hit"):
 		body.receive_hit(impact_velocity * 0.75 + Vector3.UP * 2, 0.6)
 		dangerous_time = 0
+		continuous_cd = false
 		if kind == 0: _schedule_break()
 	elif kind == 0 and body is StaticBody3D:
 		dangerous_time = 0
+		continuous_cd = false
 		_schedule_break()
 
 func _schedule_break() -> void:
@@ -150,20 +175,23 @@ func _break_apart() -> void:
 	broken = true
 	carrier = null
 	dangerous_time = 0
+	continuous_cd = false
 	freeze = true
 	collision_layer = 0
 	collision_mask = 0
 	remove_from_group("props")
 	_visuals.hide()
+	if _shard_mesh == null:
+		_shard_mesh = BoxMesh.new()
+		_shard_mesh.size = Vector3(0.14, 0.26, 0.08)
+	if _shard_material == null:
+		_shard_material = StandardMaterial3D.new()
+		_shard_material.albedo_color = Color("e3a668")
 	# Shards are visual children, so resetting the arena removes them too.
 	for i in range(8):
 		var shard := MeshInstance3D.new()
-		var box := BoxMesh.new()
-		box.size = Vector3(0.14, 0.26, 0.08)
-		shard.mesh = box
-		var material := StandardMaterial3D.new()
-		material.albedo_color = Color("e3a668")
-		shard.material_override = material
+		shard.mesh = _shard_mesh
+		shard.material_override = _shard_material
 		add_child(shard)
 		var direction := Vector3(cos(i * TAU / 8), 0, sin(i * TAU / 8))
 		var tween := create_tween().set_parallel(true)
@@ -196,4 +224,5 @@ func release(impulse: Vector3) -> void:
 	linear_velocity = impulse
 	_flight_velocity = impulse
 	dangerous_time = 1.5 if impulse.length() > 4 else 0.0
+	continuous_cd = dangerous_time > 0
 	angular_velocity = Vector3(impulse.z, 1.5, -impulse.x).normalized() * (9.0 if kind == 1 else 6.0) if dangerous_time > 0 else Vector3.ZERO

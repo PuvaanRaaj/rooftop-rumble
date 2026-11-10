@@ -151,10 +151,10 @@ func _button(text: String, callback: Callable) -> Button:
 func _controls() -> void:
 	if _mobile:
 		return
-	_content.add_child(_label("KEYBOARD 1   WASD · Space · F / G / E", 16, MUTED))
+	_content.add_child(_label("KEYBOARD 1   WASD / Arrows · Space · F / G / H", 16, MUTED))
 	_content.add_child(_label("KEYBOARD 2   Arrows · Shift · K / L / Enter", 16, MUTED))
 	_content.add_child(_label("GAMEPAD   Left stick · A jump · X punch · B shove · Y grab/throw", 15, MUTED))
-	_content.add_child(_label("Tap E / Enter / Y to grab. Tap again to THROW!", 15, ACCENT))
+	_content.add_child(_label("Tap G / Enter / Y to grab. Tap again to THROW!", 15, ACCENT))
 
 func show_menu() -> void:
 	_clear()
@@ -236,7 +236,7 @@ func show_setup() -> void:
 		var select := OptionButton.new()
 		select.custom_minimum_size.y = 48 if _mobile else 44
 		select.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		select.add_item("Keyboard 1" if _mobile else "Keyboard 1 · WASD", 0)
+		select.add_item("Keyboard 1" if _mobile else "Keyboard 1 · WASD / Arrows", 0)
 		select.add_item("Keyboard 2" if _mobile else "Keyboard 2 · Arrows", 1)
 		select.add_item("CPU" if _mobile else "CPU · rooftop troublemaker", 2)
 		if _mobile:
@@ -256,7 +256,8 @@ func show_setup() -> void:
 	var gamepad_hint := "Press a gamepad button, then reopen setup to detect it." if OS.has_feature("web") else "Connect gamepads before opening this screen."
 	_error = _label("" if _mobile else gamepad_hint, 16 if _mobile else 15, MUTED)
 	_content.add_child(_error)
-	if not _mobile: _button("START MATCH", _start_match)
+	var start_btn: Button
+	if not _mobile: start_btn = _button("START MATCH", _start_match)
 	var audio_row := _audio_options()
 	if _mobile:
 		_error.hide()
@@ -264,6 +265,7 @@ func show_setup() -> void:
 		audio_row.hide()
 	var back := _button("Back", show_menu)
 	if _mobile: back.custom_minimum_size.y = 48
+	if is_instance_valid(start_btn): start_btn.grab_focus()
 
 func _start_match() -> void:
 	var configs: Array = []

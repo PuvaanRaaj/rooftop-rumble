@@ -36,6 +36,7 @@ func _ready() -> void:
 	light.light_color = Color("fff2d4")
 	light.light_energy = 0.8
 	light.shadow_enabled = true
+	light.directional_shadow_max_distance = 28.0
 	add_child(light)
 	arena = RooftopArena.new()
 	add_child(arena)
@@ -82,6 +83,11 @@ func begin_round() -> void:
 	arena.reset()
 	effects.start_music(str(arena.map_id))
 	RumbleInput.reset()
+	var keyboard_slots: Array = []
+	for config in configs:
+		if config.get("kind", "keyboard") == "keyboard":
+			keyboard_slots.append(config.get("slot", 0))
+	RumbleInput.dual_keyboard = (0 in keyboard_slots and 1 in keyboard_slots)
 	rounds.round_number += 1
 	for i in range(configs.size()):
 		var player := RumblePlayer.new()
@@ -118,6 +124,7 @@ func return_menu() -> void:
 	players.clear()
 	arena.reset()
 	effects.stop_music()
+	RumbleInput.dual_keyboard = false
 	ui.show_menu()
 func _audio_settings(music_enabled: bool, sfx_enabled: bool) -> void:
 	effects.set_music_enabled(music_enabled)

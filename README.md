@@ -44,11 +44,11 @@ Godot's Compatibility renderer is configured. Native builds target macOS, Window
 
 | Action | Keyboard 1 | Keyboard 2 | Gamepad |
 |---|---|---|---|
-| Move | WASD | Arrow keys | Left stick |
+| Move | WASD or Arrow keys | Arrow keys | Left stick |
 | Jump / struggle out of a grab | Space | Right Shift | A / bottom face button |
 | Punch | F | K | X / left face button |
-| Shove / throw held fighter or object | G | L | B / right face button |
-| Grab / pick up / throw | E | Enter | Y / top face button |
+| Shove / throw held fighter or object | H | L | B / right face button |
+| Grab / pick up / throw | G (or E) | Enter | Y / top face button |
 | Return to main menu | Escape | Escape | Keyboard Escape |
 
 Left Shift is also accepted for Keyboard 2. Controller face buttons use Godot's standard gamepad mapping; printed symbols vary by controller. Connect controllers **before opening player setup**. Each keyboard layout and controller can join once; multiple CPU opponents are allowed. The default crew is Keyboard 1 and one CPU.
@@ -129,7 +129,7 @@ The camera now shows fighters and the main roof roughly one-third larger at the 
 
 ### Animated throws and interactive props
 
-Tap **E / Enter / gamepad Y** to grab, then tap again to throw. A direction arrow and THROW prompt show what to do while carrying. The fighter draws the object back, releases it into a spinning physical arc, and follows through; **G / L / gamepad B** remains a throw shortcut. Hits, escapes, and round/menu transitions cancel unfinished throws.
+Tap **G (or E) / Enter / gamepad Y** to grab, then tap again to throw. A direction arrow and THROW prompt show what to do while carrying. The fighter draws the object back, releases it into a spinning physical arc, and follows through; **H / L / gamepad B** remains a throw shortcut. Hits, escapes, and round/menu transitions cancel unfinished throws.
 
 The roof now has eight props: wooden crates that break into fading shards after thrown impacts, heavier metal barrels that roll and tumble, and colorful beach balls with stronger bounce. Props reset between rounds. Automated throw and prop suites cover timing, cancellation, physical flight, bounce, impact safety, and cleanup.
 

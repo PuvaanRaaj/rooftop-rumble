@@ -251,11 +251,14 @@ func toggle_grab() -> void:
 	grab_cooldown = 0.3
 	var best: Node3D
 	var distance := 1.8
-	var candidates := get_tree().get_nodes_in_group("fighters") + get_tree().get_nodes_in_group("props")
-	for candidate in candidates:
-		if candidate == self: continue
-		if candidate is RumblePlayer and (not candidate.alive or candidate.grabbed_by != null): continue
-		if candidate is RumbleProp and candidate.carrier != null: continue
+	for candidate in get_tree().get_nodes_in_group("fighters"):
+		if candidate == self or not candidate.alive or candidate.grabbed_by != null: continue
+		var offset: Vector3 = candidate.global_position - global_position
+		if offset.length() < distance and facing.dot(offset.normalized()) > 0:
+			best = candidate
+			distance = offset.length()
+	for candidate in get_tree().get_nodes_in_group("props"):
+		if candidate.carrier != null: continue
 		var offset: Vector3 = candidate.global_position - global_position
 		if offset.length() < distance and facing.dot(offset.normalized()) > 0:
 			best = candidate
@@ -348,7 +351,7 @@ func _create_hold_feedback() -> void:
 	shaft.material_override = mat
 	aim_arrow.add_child(shaft)
 	hold_hint = Label3D.new()
-	var key := "Y" if config.get("device",-1) >= 0 else ("E" if config.get("slot",0) == 0 else "Enter")
+	var key := "Y" if config.get("device",-1) >= 0 else ("G" if config.get("slot",0) == 0 else "Enter")
 	hold_hint.text = "TAP THROW" if config.get("kind", "keyboard") == "touch" else key + " THROW"
 	hold_hint.position.y = 2.45
 	hold_hint.font_size = 30

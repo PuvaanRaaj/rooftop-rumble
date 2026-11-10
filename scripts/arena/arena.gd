@@ -187,7 +187,12 @@ func _box(parent: Node3D, center: Vector3, size: Vector3, color: Color, glow := 
 	parent.add_child(mesh)
 	return mesh
 
+static var _material_cache: Dictionary = {}
+
 func _material(color: Color, glow := false) -> StandardMaterial3D:
+	var key: int = color.to_rgba32() | (1 << 32 if glow else 0)
+	if _material_cache.has(key):
+		return _material_cache[key]
 	var material := StandardMaterial3D.new()
 	material.albedo_color = color
 	material.roughness = 0.82
@@ -195,6 +200,7 @@ func _material(color: Color, glow := false) -> StandardMaterial3D:
 		material.emission_enabled = true
 		material.emission = color
 		material.emission_energy_multiplier = 0.5
+	_material_cache[key] = material
 	return material
 
 func _ring(center: Vector3, color: Color, radius := 0.7) -> void:

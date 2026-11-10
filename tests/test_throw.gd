@@ -21,7 +21,7 @@ func run() -> void:
 	player.toggle_grab()
 	player._update_hold()
 	check(player.held_prop == prop and prop.carrier == player and prop.freeze,"Grab attaches the real rigid body")
-	check(player.hold_hint.visible and player.hold_hint.text == "E THROW" and player.aim_arrow.visible,"Human sees contextual throw key and direction")
+	check(player.hold_hint.visible and player.hold_hint.text == "G THROW" and player.aim_arrow.visible,"Human sees contextual throw key and direction")
 	var held_position := prop.position
 	player.toggle_grab()
 	check(player.throw_time == 0 and player.held_prop == prop,"Second grab starts windup without dropping object")

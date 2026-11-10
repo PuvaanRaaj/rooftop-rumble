@@ -72,23 +72,44 @@ func _play_sfx(stream: AudioStream) -> void:
 	voice.stop()
 	voice.stream = stream
 	voice.play()
+var _shared_box_mesh: BoxMesh
+var _fragment_pool: Array[MeshInstance3D] = []
+
+func _create_fragment() -> MeshInstance3D:
+	if _shared_box_mesh == null:
+		_shared_box_mesh = BoxMesh.new()
+		_shared_box_mesh.size = Vector3.ONE * 0.13
+	var mesh := MeshInstance3D.new()
+	mesh.mesh = _shared_box_mesh
+	var material := StandardMaterial3D.new()
+	material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	mesh.material_override = material
+	mesh.visible = false
+	add_child(mesh)
+	return mesh
+
 func burst(where: Vector3, tint: Color, strength: float) -> void:
 	for i in range(8):
-		var mesh := MeshInstance3D.new()
-		var box := BoxMesh.new()
-		box.size = Vector3.ONE * 0.13
-		mesh.mesh = box
-		var material := StandardMaterial3D.new()
-		material.albedo_color = tint
-		material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-		mesh.material_override = material
-		add_child(mesh)
+		var mesh: MeshInstance3D
+		if _fragment_pool.is_empty():
+			mesh = _create_fragment()
+		else:
+			mesh = _fragment_pool.pop_back()
+		var material := mesh.material_override as StandardMaterial3D
+		if material != null:
+			material.albedo_color = tint
+		mesh.visible = true
+		mesh.scale = Vector3.ONE
 		mesh.global_position = where
 		var direction := Vector3(randf_range(-1,1),randf_range(0.3,1.5),randf_range(-1,1))
 		var tween := create_tween().set_parallel(true)
 		tween.tween_property(mesh,"position",mesh.position+direction*(0.8+strength),0.5)
 		tween.tween_property(mesh,"scale",Vector3.ZERO,0.5)
-		tween.chain().tween_callback(mesh.queue_free)
+		tween.chain().tween_callback(func() -> void:
+			if is_instance_valid(mesh):
+				mesh.visible = false
+				_fragment_pool.append(mesh)
+		)
 	if strength > 0.3: tone(100+strength*180,0.09)
 func tone(frequency: float, duration: float) -> void:
 	if not sfx_enabled or DisplayServer.get_name() == "headless": return
@@ -118,3 +139,4 @@ func _exit_tree() -> void:
 		voice.stop()
 		voice.stream = null
 	tones.clear()
+	_fragment_pool.clear()
