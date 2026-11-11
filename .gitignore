@@ -9,3 +9,5 @@ docs/*.import
 .env
 .env.*
 test-results/
+.vercel
+.env*.local
